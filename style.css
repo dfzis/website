@@ -1,0 +1,105 @@
+:root {
+    --bg: #0b0b0d;
+    --fg: #e8e6e1;
+    --muted: #6b6a66;
+    --link: #e8e6e1;
+    --link-hover: #ffffff;
+    --rule: #1a1a1d;
+    --selection: #2a2a2e;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+::selection {
+    background: var(--selection);
+    color: var(--fg);
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+main {
+    min-height: 100%;
+    max-width: 36rem;
+    margin: 0 auto;
+    padding: 6rem 1.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+header h1 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+section p {
+    font-size: 1rem;
+    color: var(--fg);
+}
+
+a {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: var(--muted);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: color 120ms ease, text-decoration-color 120ms ease;
+}
+
+a:hover,
+a:focus-visible {
+    color: var(--link-hover);
+    text-decoration-color: var(--link-hover);
+}
+
+a:focus-visible {
+    outline: 1px solid var(--link-hover);
+    outline-offset: 4px;
+    border-radius: 2px;
+}
+
+footer {
+    margin-top: auto;
+    padding-top: 3rem;
+    border-top: 1px solid var(--rule);
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+@media (max-width: 480px) {
+    main {
+        padding: 4rem 1.25rem 2rem;
+    }
+
+    header h1 {
+        font-size: 1.125rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
