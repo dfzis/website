@@ -118,12 +118,25 @@ body {
 }
 
 /* ── atmosphere ─────────────────────────────────────────── */
-.sky {
+/* drop a frutiger aero / sky+hills photo at /assets/backdrop.jpg.
+   the gradient below sits underneath as a fallback for when the
+   image is missing or still loading. */
+.backdrop {
     position: fixed;
     inset: 0;
     z-index: -3;
-    background: radial-gradient(80rem 50rem at 50% -10%, rgba(255, 255, 255, 0.7), transparent 60%);
     pointer-events: none;
+    background-image:
+        url('/assets/backdrop.jpg'),
+        linear-gradient(180deg,
+            var(--sky-1) 0%,
+            var(--sky-2) 38%,
+            var(--sky-3) 68%,
+            var(--grass-1) 92%,
+            var(--grass-2) 100%);
+    background-size: cover, auto;
+    background-position: center center, center center;
+    background-repeat: no-repeat, no-repeat;
 }
 
 .aurora {
@@ -132,9 +145,9 @@ body {
     z-index: -2;
     pointer-events: none;
     background:
-        radial-gradient(40rem 24rem at 15% 25%, rgba(255, 182, 255, 0.35), transparent 60%),
-        radial-gradient(50rem 28rem at 85% 20%, rgba(140, 255, 230, 0.40), transparent 60%),
-        radial-gradient(60rem 30rem at 50% 70%, rgba(182, 255, 60, 0.20), transparent 70%);
+        radial-gradient(40rem 24rem at 15% 25%, rgba(255, 182, 255, 0.25), transparent 60%),
+        radial-gradient(50rem 28rem at 85% 20%, rgba(140, 255, 230, 0.30), transparent 60%),
+        radial-gradient(60rem 30rem at 50% 70%, rgba(182, 255, 60, 0.15), transparent 70%);
     mix-blend-mode: screen;
     filter: blur(24px);
     animation: drift 28s ease-in-out infinite alternate;
@@ -142,44 +155,6 @@ body {
 @keyframes drift {
     0%   { transform: translate(0, 0); }
     100% { transform: translate(2%, -3%); }
-}
-
-.clouds {
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    overflow: hidden;
-}
-.cloud {
-    position: absolute;
-    width: 320px;
-    height: 90px;
-    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55) 55%, transparent 80%);
-    filter: blur(10px);
-    border-radius: 50%;
-    will-change: transform;
-    animation: cloud-drift linear infinite;
-}
-.cloud.c1 { top: 8%;  left: -25%; animation-duration: 140s; }
-.cloud.c2 { top: 22%; left: -45%; transform: scale(0.7); animation-duration: 180s; animation-delay: -50s; }
-.cloud.c3 { top: 4%;  left: -30%; transform: scale(1.25); animation-duration: 220s; animation-delay: -90s; }
-@keyframes cloud-drift { to { transform: translateX(160vw); } }
-
-.hills {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 32vh;
-    min-height: 200px;
-    z-index: -1;
-    pointer-events: none;
-}
-.hills svg {
-    width: 100%;
-    height: 100%;
-    display: block;
 }
 
 /* ── floating bubbles ───────────────────────────────────── */
