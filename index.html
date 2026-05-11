@@ -3,65 +3,188 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="dark">
-    <meta name="theme-color" content="#05010f">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#7ec8f5">
 
-    <title>xv ✶ welcome 2 the cyberzone</title>
-    <meta name="description" content="xv :: a lil corner of the world wide web, est. y2k.">
+    <title>xv ✿ welcome 2 the future</title>
+    <meta name="description" content="xv :: a small glossy corner of the internet.">
 
-    <meta property="og:title" content="xv ✶ welcome 2 the cyberzone">
-    <meta property="og:description" content="xv :: a lil corner of the world wide web, est. y2k.">
+    <meta property="og:title" content="xv ✿ welcome 2 the future">
+    <meta property="og:description" content="xv :: a small glossy corner of the internet.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://mewkke.me/">
 
     <link rel="icon" href="/favicon.png" type="image/png">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="scanlines" aria-hidden="true"></div>
-    <div class="grid" aria-hidden="true"></div>
+    <div class="loader" id="loader" aria-hidden="true">
+        <div class="loader-window">
+            <div class="loader-title">starting xv...</div>
+            <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+            <div class="loader-status">connecting to the future @ 56k</div>
+        </div>
+    </div>
+
+    <div class="sky" aria-hidden="true"></div>
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="clouds" aria-hidden="true">
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="cloud c3"></div>
+    </div>
+    <div class="hills" aria-hidden="true">
+        <svg viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="hill-back" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#b6f57e"/>
+                    <stop offset="1" stop-color="#5bc26a"/>
+                </linearGradient>
+                <linearGradient id="hill-front" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#7fd66a"/>
+                    <stop offset="1" stop-color="#2e9457"/>
+                </linearGradient>
+            </defs>
+            <path d="M0,210 C240,130 480,250 720,190 C960,130 1200,250 1440,170 L1440,320 L0,320 Z" fill="url(#hill-back)" opacity="0.9"/>
+            <path d="M0,260 C200,200 420,300 720,250 C1020,200 1240,300 1440,240 L1440,320 L0,320 Z" fill="url(#hill-front)"/>
+        </svg>
+    </div>
+    <div class="bubbles" aria-hidden="true">
+        <span class="bubble" style="--x:4%;  --size:90px;  --delay:-2s;  --duration:24s"></span>
+        <span class="bubble" style="--x:12%; --size:140px; --delay:-9s;  --duration:30s"></span>
+        <span class="bubble" style="--x:21%; --size:70px;  --delay:-4s;  --duration:20s"></span>
+        <span class="bubble" style="--x:30%; --size:110px; --delay:-14s; --duration:26s"></span>
+        <span class="bubble" style="--x:39%; --size:60px;  --delay:-7s;  --duration:18s"></span>
+        <span class="bubble" style="--x:48%; --size:160px; --delay:-18s; --duration:34s"></span>
+        <span class="bubble" style="--x:57%; --size:80px;  --delay:-3s;  --duration:22s"></span>
+        <span class="bubble" style="--x:64%; --size:120px; --delay:-11s; --duration:28s"></span>
+        <span class="bubble" style="--x:73%; --size:55px;  --delay:-6s;  --duration:19s"></span>
+        <span class="bubble" style="--x:81%; --size:100px; --delay:-16s; --duration:25s"></span>
+        <span class="bubble" style="--x:88%; --size:75px;  --delay:-8s;  --duration:21s"></span>
+        <span class="bubble" style="--x:95%; --size:130px; --delay:-20s; --duration:32s"></span>
+    </div>
 
     <main>
-        <header>
-            <p class="kicker">::: now loading <span class="blink">_</span></p>
-            <h1 class="chrome" data-text="xv">xv</h1>
-            <p class="tagline">★ welcome 2 the cyberzone ★</p>
-        </header>
-
-        <section class="card">
-            <p class="marquee" aria-label="site marquee">
-                <span>♡ surfin' the information superhighway ♡ est. y2k ♡ best viewed @ 1024×768 ♡ powered by vibes ♡ </span>
-                <span aria-hidden="true">♡ surfin' the information superhighway ♡ est. y2k ♡ best viewed @ 1024×768 ♡ powered by vibes ♡ </span>
-            </p>
+        <section class="panel hero">
+            <header class="titlebar">
+                <span class="tb-buttons"><i></i><i></i><i></i></span>
+                <span class="tb-title">xv.exe — welcome.html</span>
+            </header>
+            <div class="hero-body">
+                <p class="kicker">✿ personal homepage ✿ est. y2k</p>
+                <h1 class="wordmark" data-text="xv">xv</h1>
+                <p class="tagline">welcome to my little corner of the future</p>
+            </div>
         </section>
 
-        <section class="card about">
-            <h2>&gt; about.txt</h2>
-            <p>hi, i'm <strong>xv</strong>. livin' in a long forgotten world &mdash; somewhere between dial&#8209;up and the next millennium.</p>
+        <div class="grid">
+            <section class="panel about">
+                <header class="titlebar">
+                    <span class="tb-buttons"><i></i><i></i><i></i></span>
+                    <span class="tb-title">about.html</span>
+                </header>
+                <div class="panel-body about-body">
+                    <div class="orb" aria-hidden="true"></div>
+                    <div>
+                        <h2>hi, i'm <strong>xv</strong> ✿</h2>
+                        <p>i make small things on the internet — somewhere between a blue sky afternoon and the homepage of an alternate 2008. tech and nature, soft and shiny.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel links">
+                <header class="titlebar">
+                    <span class="tb-buttons"><i></i><i></i><i></i></span>
+                    <span class="tb-title">contacts.lnk</span>
+                </header>
+                <div class="panel-body links-body">
+                    <a class="aero-btn" href="https://github.com/mewkke" rel="me noopener" target="_blank">
+                        <span class="aero-btn-icon" aria-hidden="true">✦</span>
+                        <span>github</span>
+                    </a>
+                    <a class="aero-btn" href="mailto:hi@xv.me">
+                        <span class="aero-btn-icon" aria-hidden="true">✉</span>
+                        <span>email</span>
+                    </a>
+                    <a class="aero-btn" href="#guestbook">
+                        <span class="aero-btn-icon" aria-hidden="true">♡</span>
+                        <span>guestbook</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <section class="panel gallery">
+            <header class="titlebar">
+                <span class="tb-buttons"><i></i><i></i><i></i></span>
+                <span class="tb-title">gallery.dir</span>
+            </header>
+            <div class="panel-body">
+                <div class="tiles">
+                    <figure class="tile t1"><span>★</span><figcaption>sky.png</figcaption></figure>
+                    <figure class="tile t2"><span>♪</span><figcaption>aurora.mp3</figcaption></figure>
+                    <figure class="tile t3"><span>✿</span><figcaption>meadow.jpg</figcaption></figure>
+                    <figure class="tile t4"><span>☁</span><figcaption>cloud9.gif</figcaption></figure>
+                </div>
+            </div>
         </section>
 
-        <section class="card links">
-            <h2>&gt; bookmarks.html</h2>
-            <ul>
-                <li>
-                    <span class="dot" aria-hidden="true">✦</span>
-                    <a href="https://github.com/mewkke" rel="me noopener" target="_blank">github.com/xv</a>
-                </li>
-            </ul>
+        <section class="panel player" id="guestbook">
+            <header class="titlebar">
+                <span class="tb-buttons"><i></i><i></i><i></i></span>
+                <span class="tb-title">media player — now playing</span>
+            </header>
+            <div class="panel-body player-body">
+                <div class="player-art" aria-hidden="true"></div>
+                <div class="player-info">
+                    <div class="player-track">optimistic_future.mp3</div>
+                    <div class="player-artist">xv ✿ aurora suite (2006 remaster)</div>
+                    <div class="player-bar"><div class="player-bar-fill"></div></div>
+                    <div class="player-controls" aria-hidden="true">
+                        <i>⏮</i><i class="play">▶</i><i>⏭</i>
+                        <span class="player-time">02:14 / 05:48</span>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section class="counter" aria-label="visitor counter">
-            <span class="counter-label">visitors:</span>
-            <span class="counter-digits">
-                <span>0</span><span>0</span><span>0</span><span>1</span><span>3</span><span>3</span><span>7</span>
-            </span>
-        </section>
-
-        <footer>
-            <p class="muted">© xv ✶ all your base ✶ <span class="blink">●</span> online</p>
-            <p class="muted tiny">best viewed in netscape navigator 4.0+</p>
+        <footer class="statusbar">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span>connected · 56k modem · est. y2k</span>
+            <span class="status-spacer"></span>
+            <span>© xv</span>
         </footer>
     </main>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const l = document.getElementById('loader');
+                if (l) l.classList.add('done');
+            }, 900);
+        });
+
+        (function () {
+            if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (matchMedia('(hover: none)').matches) return;
+            let last = 0;
+            document.addEventListener('pointermove', (e) => {
+                const now = performance.now();
+                if (now - last < 70) return;
+                last = now;
+                const s = document.createElement('span');
+                s.className = 'sparkle';
+                s.style.left = e.clientX + 'px';
+                s.style.top = e.clientY + 'px';
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 900);
+            }, { passive: true });
+        })();
+    </script>
 </body>
 </html>
