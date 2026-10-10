@@ -3,11 +3,23 @@
 
     const PROFILE = {
         tag: 'mewzah',
-        motto: 'living in a long forgotten world',
+        gamerscore: 999,
+        bio: 'living in a long forgotten world',
         location: 'グランド・エクスチェンジ',
         pic: 'assets/avatar.jpg',
-        discord: 'mewzah',
+        gamerpic: 'assets/gamerpic.jpg',
     };
+
+    // count: a number shows "12.5K followers"; null shows the handle instead.
+    const SOCIALS = {
+        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: null, unit: 'subscribers' },
+        twitch: { name: 'Twitch', handle: 'mewzah', href: 'https://www.twitch.tv/mewzah', count: null, unit: 'followers' },
+        tiktok: { name: 'TikTok', handle: '@mewzah', href: 'https://www.tiktok.com/@mewzah', count: null, unit: 'followers' },
+        x: { name: 'X', handle: '@mewzah', href: 'https://x.com/mewzah', count: null, unit: 'followers' },
+        discord: { name: 'Discord', handle: 'mewzah', copy: 'mewzah' },
+    };
+
+    const GAME = { title: 'Call of Duty: World at War', art: 'assets/waw.jpg' };
     const SONG_TITLE = 'x';
 
     // Optional real sound files, e.g. { select: 'assets/sfx/select.wav' }. Missing entries are synthesized.
@@ -19,35 +31,89 @@
         tiktok: 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z',
         discord: 'M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z',
         x: 'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z',
+        controller: 'M6.6 5.5h10.8c2.6 0 4.3 1.9 4.8 4.5l1.1 5.9c.4 2.3-1.1 4.1-3.1 4.1-1.3 0-2.3-.7-3-1.9L16 15.7H8l-1.2 2.4c-.7 1.2-1.7 1.9-3 1.9-2 0-3.5-1.8-3.1-4.1L1.8 10c.5-2.6 2.2-4.5 4.8-4.5zM6 8.6v1.9H4.1v1.8H6v1.9h1.8v-1.9h1.9v-1.8H7.8V8.6zm11.1-.1a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm-2.2 2.2a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm4.4 0a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm-2.2 2.2a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1z',
+        camera: 'M6.5 2.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm8.5-1a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM2.5 11h14.5v9H2.5zM17.5 14.5l4.5-3v8l-4.5-3z',
         note: 'M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z',
         gear: 'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
     };
 
+    function social(key) {
+        const s = SOCIALS[key];
+        return { label: s.name, icon: key, href: s.href, copy: s.copy };
+    }
+
     const CHANNELS = [
         {
-            name: 'Videos',
-            tiles: [
-                { label: 'YouTube', icon: 'youtube', href: 'https://www.youtube.com/@mewzah' },
-                { label: 'Twitch', icon: 'twitch', href: 'https://www.twitch.tv/mewzah' },
-                { label: 'TikTok', icon: 'tiktok', href: 'https://www.tiktok.com/@mewzah' },
-            ],
+            name: 'Friends',
+            tiles: [social('discord'), social('x')],
         },
         {
-            name: 'Social',
-            tiles: [
-                { label: 'Discord', icon: 'discord', copy: PROFILE.discord },
-                { label: 'X', icon: 'x', href: 'https://x.com/mewzah' },
-            ],
+            name: 'Video Marketplace',
+            tiles: [social('youtube'), social('twitch'), social('tiktok')],
         },
         {
-            name: 'My mewzah',
+            name: 'My Xbox',
             tiles: [
-                { kind: 'profile', label: 'Gamer Profile', screen: 'profile' },
+                {
+                    kind: 'disc',
+                    label: `Play ${GAME.title}`,
+                    screen: 'game',
+                    extra: [['x', 'Eject', eject], ['y', 'Game Details', () => openScreen('game')]],
+                },
+                { kind: 'gamercard', label: 'Gamer Profile', screen: 'profile' },
+                { label: 'Game Library', icon: 'controller', screen: 'game' },
+                { label: 'Video Library', icon: 'camera', go: 'Video Marketplace' },
                 { label: 'Music Library', icon: 'note', screen: 'music' },
                 { label: 'System Settings', icon: 'gear', screen: 'settings' },
             ],
         },
     ];
+
+    const AVATAR = `<svg viewBox="0 0 160 400" aria-hidden="true">
+        <defs>
+            <radialGradient id="av-skin" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#ffe2c8"/><stop offset=".62" stop-color="#f1c29e"/><stop offset="1" stop-color="#cf9670"/></radialGradient>
+            <linearGradient id="av-hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d5434"/><stop offset="1" stop-color="#3d2615"/></linearGradient>
+            <linearGradient id="av-tee" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#121417"/><stop offset=".42" stop-color="#363c43"/><stop offset="1" stop-color="#101214"/></linearGradient>
+            <linearGradient id="av-jeans" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f3354"/><stop offset=".5" stop-color="#43699b"/><stop offset="1" stop-color="#1c2e4c"/></linearGradient>
+            <linearGradient id="av-arm" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c98f69"/><stop offset=".5" stop-color="#f4caa7"/><stop offset="1" stop-color="#c38a64"/></linearGradient>
+            <linearGradient id="av-shoe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#bfc6cc"/></linearGradient>
+        </defs>
+        <ellipse cx="80" cy="394" rx="50" ry="7" fill="rgba(20,30,10,.3)"/>
+        <g class="av-body">
+            <path d="M44 130C35 150 31 192 30 228h17c1-34 5-70 12-92z" fill="url(#av-arm)"/>
+            <path d="M116 130c9 20 13 62 14 98h-17c-1-34-5-70-12-92z" fill="url(#av-arm)"/>
+            <ellipse cx="38.5" cy="237" rx="10.5" ry="12" fill="url(#av-skin)"/>
+            <ellipse cx="121.5" cy="237" rx="10.5" ry="12" fill="url(#av-skin)"/>
+            <path d="M53 216h27l-2 156H58z" fill="url(#av-jeans)"/>
+            <path d="M80 216h27l-5 156H82z" fill="url(#av-jeans)"/>
+            <path d="M80 224v104" stroke="#18273f" stroke-width="1.5"/>
+            <path d="M53 214h54v11H53z" fill="#1b2a44"/>
+            <path d="M56 368h24c2 0 3 2 3 4v14c0 4-3 7-7 7H48c-5 0-7-4-5-8l6-12c1-3 3-5 7-5z" fill="url(#av-shoe)"/>
+            <path d="M104 368H80c-2 0-3 2-3 4v14c0 4 3 7 7 7h28c5 0 7-4 5-8l-6-12c-1-3-3-5-7-5z" fill="url(#av-shoe)"/>
+            <path d="M45 389h36M79 389h36" stroke="#9aa2a9" stroke-width="3" stroke-linecap="round"/>
+            <path d="M58 112c-10 2-18 8-21 18l-7 30 20 6 4-14v74h52v-74l4 14 20-6-7-30c-3-10-11-16-21-18-6 4-14 6-22 6s-16-2-22-6z" fill="url(#av-tee)"/>
+            <circle cx="80" cy="160" r="15" fill="none" stroke="#a6e22e" stroke-width="3.5"/>
+            <circle cx="80" cy="160" r="6" fill="#a6e22e"/>
+            <path d="M71 98h18v19c-3 5-15 5-18 0z" fill="#d79f79"/>
+            <ellipse cx="41.5" cy="66" rx="7" ry="10" fill="#e3ad86"/>
+            <ellipse cx="118.5" cy="66" rx="7" ry="10" fill="#e3ad86"/>
+            <ellipse cx="80" cy="62" rx="39" ry="44" fill="url(#av-skin)"/>
+            <g class="av-eyes">
+                <ellipse cx="65" cy="68" rx="7.5" ry="8.5" fill="#fff"/>
+                <ellipse cx="95" cy="68" rx="7.5" ry="8.5" fill="#fff"/>
+                <circle cx="66" cy="69" r="5" fill="#4a2d17"/>
+                <circle cx="94" cy="69" r="5" fill="#4a2d17"/>
+                <circle cx="67.6" cy="67" r="1.7" fill="#fff"/>
+                <circle cx="95.6" cy="67" r="1.7" fill="#fff"/>
+            </g>
+            <path d="M57 55q8-5 16-1M87 54q8-4 16 1" stroke="#4a2f1d" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path d="M79 76q2 6 5 5" stroke="#c48761" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M70 89q10 7 20 0" stroke="#9c5a3c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M41 62c-3-32 17-48 39-48 24 0 42 16 39 48-3-10-7-16-13-20l-2 8-8-12-6 9-8-13-6 12-8-9-4 12-8-9-4 12c-4 2-8 5-11 10z" fill="url(#av-hair)"/>
+        </g>
+    </svg>`;
+
+    const GCOIN = '<svg class="gcoin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="#fff" stroke-width="1.7"/><text x="10" y="14.3" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="Segoe UI, Arial, sans-serif">G</text></svg>';
 
     const $ = (sel) => document.querySelector(sel);
     const stage = $('#stage');
@@ -58,8 +124,7 @@
     const toastEl = $('#toast');
     const srEl = $('#sr');
     const song = $('#song');
-    const legendB = $('[data-btn="b"]');
-    const legendY = $('[data-btn="y"] span');
+    const legendEl = $('#legend');
 
     const n = CHANNELS.length;
     const state = {
@@ -96,7 +161,7 @@
     const setSetting = (key, value) => {
         settings[key] = value;
         store.set(`mz.${key}`, value);
-        legendY.textContent = settings.sound ? 'Sound On' : 'Sound Off';
+        document.body.classList.toggle('still', !settings.motion);
         needsDraw = true;
     };
 
@@ -210,6 +275,12 @@
             notify: () => play('notify', (t) => {
                 [1318.5, 1760, 2093].forEach((f, i) => tone(f, t + i * 0.07, 0.7, { gain: 0.045 }));
             }),
+            eject: () => play('eject', (t) => {
+                tone(2200, t, 0.03, { gain: 0.04, type: 'square' });
+                noise(t + 0.03, 0.55, { gain: 0.09, f0: 260, f1: 900, q: 2.5 });
+                tone(110, t + 0.04, 0.5, { gain: 0.035, type: 'triangle', to: 150 });
+                tone(1800, t + 0.6, 0.03, { gain: 0.035, type: 'square' });
+            }),
         };
     })();
 
@@ -221,15 +292,33 @@
         return el;
     };
     const glyph = (name) =>
-        `<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path fill="url(#glyph-fill)" d="${ICONS[name]}"/></svg>`;
+        `<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path fill="url(#glyph-fill)" fill-rule="evenodd" d="${ICONS[name]}"/></svg>`;
+    const icon = (name, cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
     const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
     const songReady = () => song.readyState >= 1 && Number.isFinite(song.duration);
+    const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+    const statText = (s) => (s.count == null ? s.handle : `${compact.format(s.count)} ${s.unit}`);
+    const currentTile = () => CHANNELS[state.ch].tiles[state.focus[state.ch]];
+
+    function scoreLine(cls) {
+        const p = make('p', cls);
+        p.innerHTML = `<span>${PROFILE.gamerscore}</span>${GCOIN}`;
+        return p;
+    }
+
+    function gamerpic(img) {
+        img.onerror = () => {
+            img.onerror = null;
+            img.src = PROFILE.pic;
+        };
+        img.src = PROFILE.gamerpic;
+    }
 
     let toastTimer;
-    function toast(msg) {
+    function toast(msg, quiet) {
         toastEl.querySelector('span').textContent = msg;
         toastEl.classList.add('show');
-        sfx.notify();
+        if (!quiet) sfx.notify();
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
     }
@@ -247,6 +336,29 @@
     function openLink(href, src) {
         if (src === 'pad') location.href = href;
         else window.open(href, '_blank', 'noopener');
+    }
+
+    function eject() {
+        sfx.eject();
+        toast('Disc tray open', true);
+    }
+
+    function renderLegend() {
+        const entries = [];
+        if (state.screen) {
+            if (state.items.length) entries.push(['a', 'Select']);
+            entries.push(['b', 'Back']);
+        } else {
+            entries.push(['a', 'Select']);
+            (currentTile().extra || []).forEach(([btn, label]) => entries.push([btn, label]));
+        }
+        legendEl.replaceChildren(...entries.map(([btn, label]) => {
+            const b = make('button');
+            b.type = 'button';
+            b.append(make('b', `pad pad-${btn}`, btn.toUpperCase()), document.createTextNode(label));
+            b.addEventListener('click', () => input(btn, 'pointer'));
+            return b;
+        }));
     }
 
     function announce() {
@@ -313,6 +425,7 @@
             el.style.transform = to.transform;
             el.style.opacity = to.opacity;
             el.style.pointerEvents = slot < 0 && to.opacity > 0 ? 'auto' : 'none';
+            el.classList.toggle('cur', slot === 0);
         });
     }
 
@@ -348,12 +461,22 @@
         } else {
             el.type = 'button';
         }
-        if (t.kind === 'profile') {
-            el.append(make('span', 't-title', PROFILE.tag), make('span', 't-sub', 'Online'));
-            const img = make('img', 't-pic');
-            img.src = PROFILE.pic;
-            img.alt = '';
-            el.append(img);
+        if (t.kind === 'gamercard') {
+            el.append(make('span', 't-title', PROFILE.tag), scoreLine('t-score'), make('span', 't-mini', 'Socials'));
+            const socials = make('span', 't-socials');
+            ['youtube', 'twitch', 'tiktok', 'x'].forEach((key) => {
+                const s = make('span', 't-soc');
+                s.innerHTML = icon(key, '');
+                if (SOCIALS[key].count != null) s.append(make('i', '', compact.format(SOCIALS[key].count)));
+                socials.append(s);
+            });
+            const loc = make('span', 't-loc', PROFILE.location);
+            loc.lang = 'ja';
+            el.append(socials, make('span', 't-status', 'Online'), loc);
+        } else if (t.kind === 'disc') {
+            el.classList.add('t-disc');
+            el.style.setProperty('--art', `url("${GAME.art}")`);
+            el.append(make('span', 't-label t-wrap', t.label), make('span', 'disc-badge'));
         } else {
             el.insertAdjacentHTML('beforeend', glyph(t.icon));
             el.append(make('span', 't-label', t.label));
@@ -370,9 +493,29 @@
             el.append(tile);
             return tile;
         });
+        let avatar = null;
+        const at = CHANNELS[ci].tiles.findIndex((t) => t.kind === 'gamercard');
+        if (at >= 0) {
+            const a = make('div', 'avatar');
+            a.innerHTML = AVATAR;
+            el.append(a);
+            avatar = { el: a, index: at };
+        }
         rowsEl.append(el);
-        return { el, tiles, ci };
+        return { el, tiles, ci, avatar };
     }
+
+    // Keeps the avatar standing at the right edge of its tile, upright (no tilt).
+    function avatarStyle(k) {
+        if (k < 0) return { t: `translate(${-470 + k * 40}px, 0px) scale(1)`, o: 0 };
+        const v = TILE_POS[Math.min(k, TILE_POS.length - 1)];
+        return { t: `translate(${v.x + v.s * 274}px, ${v.top - v.s * 31}px) scale(${v.s})`, o: k >= TILE_POS.length ? 0 : 1 };
+    }
+
+    const enterAnim = (el, st, delay) => el.animate(
+        [{ transform: st.t.replace(/^translate\(([-\d.]+)px/, (m, x) => `translate(${+x + 320}px`), opacity: 0 }, { transform: st.t, opacity: st.o }],
+        { duration: 700, delay, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' },
+    );
 
     function layoutRow(enterFromRight) {
         const f = state.focus[state.ch];
@@ -382,14 +525,16 @@
             el.style.opacity = st.o;
             el.style.zIndex = st.z;
             el.classList.toggle('focus', i === f);
-            if (enterFromRight) {
-                el.animate(
-                    [{ transform: st.t.replace(/^translate\(([-\d.]+)px/, (m, x) => `translate(${+x + 320}px`), opacity: 0 }, { transform: st.t, opacity: st.o }],
-                    { duration: 700, delay: 120 + i * 60, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' },
-                );
-            }
+            if (enterFromRight) enterAnim(el, st, 120 + i * 60);
         });
+        if (row.avatar) {
+            const st = avatarStyle(row.avatar.index - f);
+            row.avatar.el.style.transform = st.t;
+            row.avatar.el.style.opacity = st.o;
+            if (enterFromRight) enterAnim(row.avatar.el, st, 120 + row.avatar.index * 60);
+        }
         countEl.textContent = `${f + 1} of ${row.tiles.length}`;
+        renderLegend();
         announce();
     }
 
@@ -466,6 +611,10 @@
         if (t.href) openLink(t.href, src);
         else if (t.copy) copyText(t.copy);
         else if (t.screen) openScreen(t.screen);
+        else if (t.go) {
+            const i = CHANNELS.findIndex((c) => c.name === t.go);
+            gotoChannel(i, i < state.ch ? -1 : 1);
+        }
     }
 
     function back() {
@@ -484,14 +633,18 @@
     // ── screens ────────────────────────────────────────────
     const SCREENS = {
         profile: { title: 'Gamer Profile', render: renderProfile },
+        game: { title: 'Game Details', render: renderGame },
         music: { title: 'Music Library', render: renderMusic },
         settings: { title: 'System Settings', render: renderSettings },
     };
 
-    function item(parent, label, run, value) {
+    function item(parent, label, run, value, iconName) {
         const b = make('button', 'item');
         b.type = 'button';
-        b.append(make('span', '', label));
+        const lbl = make('span', 'lbl');
+        if (iconName) lbl.innerHTML = icon(iconName, 'ico');
+        lbl.append(label);
+        b.append(lbl);
         if (value !== undefined) b.append(make('span', 'val', value));
         parent.append(b);
         const entry = { el: b, run };
@@ -506,27 +659,35 @@
     function renderProfile(body) {
         const card = make('div', 'panel gamercard');
         const pic = make('img', 'gc-pic');
-        pic.src = PROFILE.pic;
         pic.alt = '';
+        gamerpic(pic);
         const info = make('div', 'gc-info');
         const status = make('p', 'gc-status');
         status.append(make('i', 'dot'), document.createTextNode('Online'));
         const dl = make('dl');
         const loc = make('dd', '', PROFILE.location);
         loc.lang = 'ja';
-        dl.append(make('dt', '', 'Motto'), make('dd', '', PROFILE.motto), make('dt', '', 'Location'), loc);
-        info.append(make('p', 'gc-tag', PROFILE.tag), status, dl);
+        dl.append(make('dt', '', 'Bio'), make('dd', '', PROFILE.bio), make('dt', '', 'Location'), loc);
+        info.append(make('p', 'gc-tag', PROFILE.tag), scoreLine('gc-score'), status, dl);
         card.append(pic, info);
 
-        const list = make('div', 'list');
+        const list = make('div', 'list compact');
+        list.append(make('p', 'list-head', 'Social Stats'));
         body.append(card, list);
-        return [
-            item(list, 'View Videos', () => {
-                closeScreen();
-                setTimeout(() => gotoChannel(0, 1), 200);
-            }),
-            item(list, 'Add Friend on Discord', () => copyText(PROFILE.discord)),
-        ];
+        return Object.entries(SOCIALS).map(([key, s]) =>
+            item(list, s.name, (src) => (s.href ? openLink(s.href, src) : copyText(s.copy)), statText(s), key));
+    }
+
+    function renderGame(body) {
+        const panel = make('div', 'panel player');
+        const art = make('div', 'art game-art');
+        art.style.setProperty('--art', `url("${GAME.art}")`);
+        const info = make('div', 'pl-info');
+        info.append(make('p', 'pl-title wrap', GAME.title), make('p', 'pl-sub', 'Xbox 360'));
+        panel.append(art, info);
+        const list = make('div', 'list');
+        body.append(panel, list);
+        return [item(list, 'Eject Disc', eject)];
     }
 
     function renderMusic(body) {
@@ -559,7 +720,7 @@
             song.play();
         });
         song.onplay = song.onpause = () => {
-            playItem.el.firstChild.textContent = song.paused ? 'Play' : 'Pause';
+            playItem.el.querySelector('.lbl').textContent = song.paused ? 'Play' : 'Pause';
         };
         return [playItem, restart];
     }
@@ -603,6 +764,7 @@
         state.items = def.render(body);
         state.sel = Math.min(state.sel, Math.max(0, state.items.length - 1));
         highlight();
+        renderLegend();
     }
 
     function openScreen(key) {
@@ -611,7 +773,6 @@
         renderScreen();
         stage.classList.add('in-screen');
         screenEl.setAttribute('aria-hidden', 'false');
-        legendB.hidden = false;
         announce();
     }
 
@@ -624,7 +785,7 @@
         state.items = [];
         stage.classList.remove('in-screen');
         screenEl.setAttribute('aria-hidden', 'true');
-        legendB.hidden = true;
+        renderLegend();
         announce();
     }
 
@@ -659,13 +820,19 @@
             }
             case 'a': activate(src); break;
             case 'b': back(); break;
-            case 'y': toggleSound(); break;
+            case 'x':
+            case 'y': {
+                if (state.screen) break;
+                const extra = (currentTile().extra || []).find(([btn]) => btn === action);
+                if (extra) extra[2]();
+                break;
+            }
         }
     }
 
     const KEYS = {
         ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
-        Enter: 'a', ' ': 'a', Escape: 'b', Backspace: 'b', y: 'y', Y: 'y',
+        Enter: 'a', ' ': 'a', Escape: 'b', Backspace: 'b', x: 'x', X: 'x', y: 'y', Y: 'y',
     };
     let lastMove = 0;
     addEventListener('keydown', (e) => {
@@ -686,10 +853,6 @@
     });
 
     ['pointerdown', 'pointerup', 'touchend'].forEach((type) => addEventListener(type, () => sfx.unlock(), { passive: true }));
-
-    document.querySelectorAll('#legend button').forEach((b) => {
-        b.addEventListener('click', () => input(b.dataset.btn, 'pointer'));
-    });
 
     let wheelAt = 0;
     addEventListener('wheel', (e) => {
@@ -740,6 +903,7 @@
             down: btn(13) || ax[1] > 0.55,
             a: btn(0),
             b: btn(1),
+            x: btn(2),
             y: btn(3),
         };
         for (const key of Object.keys(held)) {
@@ -776,6 +940,8 @@
         OX = portrait ? 0 : (W - 1280 * S) / 2;
         OY = (H - 720 * S) / 2;
         stage.style.transform = `translate(${OX}px, ${OY}px) scale(${S})`;
+        stage.style.setProperty('--view-r', `${Math.min(1280, (W - OX) / S)}px`);
+        stage.style.setProperty('--edge', portrait ? '24px' : '72px');
         needsDraw = true;
     }
     addEventListener('resize', resize);
@@ -915,6 +1081,9 @@
     });
 
     setSetting('sound', settings.sound);
+    $('.tr-name').textContent = PROFILE.tag;
+    $('.tr-score').replaceWith(scoreLine('tr-score'));
+    gamerpic($('.tr-pic'));
     resize();
     layoutChannels(false);
     chEls.forEach((el, i) => el.animate([{ opacity: 0 }, { opacity: el.style.opacity }], { duration: 600, delay: 100 + i * 60, fill: 'backwards' }));
