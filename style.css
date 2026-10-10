@@ -500,31 +500,38 @@ button:focus-visible { outline: none; }
     position: absolute;
     left: 0;
     top: 0;
-    width: 160px;
-    height: 400px;
+    width: 128px;
+    height: 390px;
     transform-origin: 0 0;
     pointer-events: none;
     z-index: 70;
     transition: transform .45s var(--ease), opacity .3s ease;
 }
-.avatar svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.av-body {
-    transform-origin: 80px 392px;
-    animation: av-sway 5s ease-in-out infinite;
+.avatar img {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: 50% 100%;
+    transform-origin: 50% 100%;
+    animation: av-breathe 4s ease-in-out infinite;
 }
-.av-eyes {
-    transform-origin: 80px 68px;
-    animation: av-blink 4.6s linear infinite;
+.avatar::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -7px;
+    width: 120px;
+    height: 18px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(20, 30, 10, .4), rgba(20, 30, 10, 0));
 }
-.still .av-body,
-.still .av-eyes { animation-play-state: paused; }
-@keyframes av-sway {
-    0%, 100% { transform: rotate(-1deg); }
-    50% { transform: rotate(1deg); }
-}
-@keyframes av-blink {
-    0%, 93%, 100% { transform: scaleY(1); }
-    95% { transform: scaleY(.1); }
+.still .avatar img { animation-play-state: paused; }
+@keyframes av-breathe {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.006); }
 }
 
 /* ── disc tile ──────────────────────────────────────────── */

@@ -19,7 +19,7 @@
     };
 
     const GAME = { title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg' };
-    const SONG_TITLE = 'x';
+    const SONG = { title: 'Zen Garden', artist: 'Xbox 360 Ambience' };
 
     // Optional real sound files, e.g. { select: 'assets/sfx/select.wav' }. Missing entries are synthesized.
     const SFX_FILES = {};
@@ -68,49 +68,7 @@
         },
     ];
 
-    const AVATAR = `<svg viewBox="0 0 160 400" aria-hidden="true">
-        <defs>
-            <radialGradient id="av-skin" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#ffe2c8"/><stop offset=".62" stop-color="#f1c29e"/><stop offset="1" stop-color="#cf9670"/></radialGradient>
-            <linearGradient id="av-hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d5434"/><stop offset="1" stop-color="#3d2615"/></linearGradient>
-            <linearGradient id="av-tee" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#121417"/><stop offset=".42" stop-color="#363c43"/><stop offset="1" stop-color="#101214"/></linearGradient>
-            <linearGradient id="av-jeans" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f3354"/><stop offset=".5" stop-color="#43699b"/><stop offset="1" stop-color="#1c2e4c"/></linearGradient>
-            <linearGradient id="av-arm" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c98f69"/><stop offset=".5" stop-color="#f4caa7"/><stop offset="1" stop-color="#c38a64"/></linearGradient>
-            <linearGradient id="av-shoe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#bfc6cc"/></linearGradient>
-        </defs>
-        <ellipse cx="80" cy="394" rx="50" ry="7" fill="rgba(20,30,10,.3)"/>
-        <g class="av-body">
-            <path d="M44 130C35 150 31 192 30 228h17c1-34 5-70 12-92z" fill="url(#av-arm)"/>
-            <path d="M116 130c9 20 13 62 14 98h-17c-1-34-5-70-12-92z" fill="url(#av-arm)"/>
-            <ellipse cx="38.5" cy="237" rx="10.5" ry="12" fill="url(#av-skin)"/>
-            <ellipse cx="121.5" cy="237" rx="10.5" ry="12" fill="url(#av-skin)"/>
-            <path d="M53 216h27l-2 156H58z" fill="url(#av-jeans)"/>
-            <path d="M80 216h27l-5 156H82z" fill="url(#av-jeans)"/>
-            <path d="M80 224v104" stroke="#18273f" stroke-width="1.5"/>
-            <path d="M53 214h54v11H53z" fill="#1b2a44"/>
-            <path d="M56 368h24c2 0 3 2 3 4v14c0 4-3 7-7 7H48c-5 0-7-4-5-8l6-12c1-3 3-5 7-5z" fill="url(#av-shoe)"/>
-            <path d="M104 368H80c-2 0-3 2-3 4v14c0 4 3 7 7 7h28c5 0 7-4 5-8l-6-12c-1-3-3-5-7-5z" fill="url(#av-shoe)"/>
-            <path d="M45 389h36M79 389h36" stroke="#9aa2a9" stroke-width="3" stroke-linecap="round"/>
-            <path d="M58 112c-10 2-18 8-21 18l-7 30 20 6 4-14v74h52v-74l4 14 20-6-7-30c-3-10-11-16-21-18-6 4-14 6-22 6s-16-2-22-6z" fill="url(#av-tee)"/>
-            <circle cx="80" cy="160" r="15" fill="none" stroke="#a6e22e" stroke-width="3.5"/>
-            <circle cx="80" cy="160" r="6" fill="#a6e22e"/>
-            <path d="M71 98h18v19c-3 5-15 5-18 0z" fill="#d79f79"/>
-            <ellipse cx="41.5" cy="66" rx="7" ry="10" fill="#e3ad86"/>
-            <ellipse cx="118.5" cy="66" rx="7" ry="10" fill="#e3ad86"/>
-            <ellipse cx="80" cy="62" rx="39" ry="44" fill="url(#av-skin)"/>
-            <g class="av-eyes">
-                <ellipse cx="65" cy="68" rx="7.5" ry="8.5" fill="#fff"/>
-                <ellipse cx="95" cy="68" rx="7.5" ry="8.5" fill="#fff"/>
-                <circle cx="66" cy="69" r="5" fill="#4a2d17"/>
-                <circle cx="94" cy="69" r="5" fill="#4a2d17"/>
-                <circle cx="67.6" cy="67" r="1.7" fill="#fff"/>
-                <circle cx="95.6" cy="67" r="1.7" fill="#fff"/>
-            </g>
-            <path d="M57 55q8-5 16-1M87 54q8-4 16 1" stroke="#4a2f1d" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-            <path d="M79 76q2 6 5 5" stroke="#c48761" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <path d="M70 89q10 7 20 0" stroke="#9c5a3c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <path d="M41 62c-3-32 17-48 39-48 24 0 42 16 39 48-3-10-7-16-13-20l-2 8-8-12-6 9-8-13-6 12-8-9-4 12-8-9-4 12c-4 2-8 5-11 10z" fill="url(#av-hair)"/>
-        </g>
-    </svg>`;
+    const AVATAR = '<img src="assets/avatar.webp" alt="" draggable="false">';
 
     const GCOIN = '<svg class="gcoin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="#fff" stroke-width="1.7"/><text x="10" y="14.3" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="Segoe UI, Arial, sans-serif">G</text></svg>';
 
@@ -511,7 +469,7 @@
     function avatarStyle(k) {
         if (k < 0) return { t: `translate(${-470 + k * 40}px, 0px) scale(1)`, o: 0 };
         const v = TILE_POS[Math.min(k, TILE_POS.length - 1)];
-        return { t: `translate(${v.x + v.s * 274}px, ${v.top - v.s * 31}px) scale(${v.s})`, o: k >= TILE_POS.length ? 0 : 1 };
+        return { t: `translate(${v.x + v.s * 290}px, ${v.top - v.s * 27}px) scale(${v.s})`, o: k >= TILE_POS.length ? 0 : 1 };
     }
 
     const enterAnim = (el, st, delay) => el.animate(
@@ -708,7 +666,7 @@
         bar.append(make('i'));
         const time = make('p', 'pl-time');
         time.append(make('span', 'cur', '0:00'), make('span', '', fmtTime(song.duration)));
-        info.append(make('p', 'pl-title', SONG_TITLE), make('p', 'pl-sub', PROFILE.tag), bar, time);
+        info.append(make('p', 'pl-title', SONG.title), make('p', 'pl-sub', SONG.artist), bar, time);
         updateMusic();
 
         const list = make('div', 'list');
