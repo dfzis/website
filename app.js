@@ -6,20 +6,19 @@
         gamerscore: 999,
         bio: 'living in a long forgotten world',
         location: 'グランド・エクスチェンジ',
-        pic: 'assets/avatar.jpg',
-        gamerpic: 'assets/gamerpic.jpg',
+        gamerpic: 'assets/gamerpic.png',
     };
 
     // count: a number shows "12.5K followers"; null shows the handle instead.
     const SOCIALS = {
-        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: null, unit: 'subscribers' },
-        twitch: { name: 'Twitch', handle: 'mewzah', href: 'https://www.twitch.tv/mewzah', count: null, unit: 'followers' },
-        tiktok: { name: 'TikTok', handle: '@mewzah', href: 'https://www.tiktok.com/@mewzah', count: null, unit: 'followers' },
-        x: { name: 'X', handle: '@mewzah', href: 'https://x.com/mewzah', count: null, unit: 'followers' },
+        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: 32000, unit: 'subscribers' },
+        twitch: { name: 'Twitch', handle: 'mewzah', href: 'https://www.twitch.tv/mewzah', count: 4400, unit: 'followers' },
+        tiktok: { name: 'TikTok', handle: 'new account', href: 'https://www.tiktok.com/@mewzah', count: null, unit: 'followers' },
+        x: { name: 'X', handle: '@mewzah', href: 'https://x.com/mewzah', count: 1600, unit: 'followers' },
         discord: { name: 'Discord', handle: 'mewzah', copy: 'mewzah' },
     };
 
-    const GAME = { title: 'Call of Duty: World at War', art: 'assets/waw.jpg' };
+    const GAME = { title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg' };
     const SONG_TITLE = 'x';
 
     // Optional real sound files, e.g. { select: 'assets/sfx/select.wav' }. Missing entries are synthesized.
@@ -56,7 +55,7 @@
             tiles: [
                 {
                     kind: 'disc',
-                    label: `Play ${GAME.title}`,
+                    label: `Play ${GAME.short}`,
                     screen: 'game',
                     extra: [['x', 'Eject', eject], ['y', 'Game Details', () => openScreen('game')]],
                 },
@@ -157,6 +156,7 @@
     const settings = {
         sound: store.get('mz.sound', true),
         motion: store.get('mz.motion', !prefersReduced),
+        music: store.get('mz.music', true),
     };
     const setSetting = (key, value) => {
         settings[key] = value;
@@ -306,14 +306,6 @@
         return p;
     }
 
-    function gamerpic(img) {
-        img.onerror = () => {
-            img.onerror = null;
-            img.src = PROFILE.pic;
-        };
-        img.src = PROFILE.gamerpic;
-    }
-
     let toastTimer;
     function toast(msg, quiet) {
         toastEl.querySelector('span').textContent = msg;
@@ -336,6 +328,16 @@
     function openLink(href, src) {
         if (src === 'pad') location.href = href;
         else window.open(href, '_blank', 'noopener');
+    }
+
+    // Browsers only allow audio after a user gesture, so the song starts on the first input.
+    let interacted = false;
+    let musicStarted = false;
+    function startMusic(force) {
+        interacted = true;
+        if ((musicStarted && !force) || !settings.music || !songReady()) return;
+        musicStarted = true;
+        song.play().catch(() => { musicStarted = false; });
     }
 
     function eject() {
@@ -660,7 +662,7 @@
         const card = make('div', 'panel gamercard');
         const pic = make('img', 'gc-pic');
         pic.alt = '';
-        gamerpic(pic);
+        pic.src = PROFILE.gamerpic;
         const info = make('div', 'gc-info');
         const status = make('p', 'gc-status');
         status.append(make('i', 'dot'), document.createTextNode('Online'));
@@ -745,10 +747,14 @@
                 }
                 setSetting(key, !settings[key]);
                 entry.el.lastChild.textContent = settings[key] ? 'On' : 'Off';
+                if (key === 'music') {
+                    if (settings.music) startMusic(true);
+                    else song.pause();
+                }
             }, settings[key] ? 'On' : 'Off');
             return entry;
         };
-        return [toggle('Sound Effects', 'sound'), toggle('Background Motion', 'motion')];
+        return [toggle('Sound Effects', 'sound'), toggle('Background Music', 'music'), toggle('Background Motion', 'motion')];
     }
 
     function highlight() {
@@ -841,6 +847,7 @@
         if (!action) return;
         e.preventDefault();
         sfx.unlock();
+        startMusic();
         const isDir = action === 'left' || action === 'right' || action === 'up' || action === 'down';
         if (e.repeat && !isDir) return;
         if (isDir) {
@@ -852,7 +859,10 @@
         input(action, 'key');
     });
 
-    ['pointerdown', 'pointerup', 'touchend'].forEach((type) => addEventListener(type, () => sfx.unlock(), { passive: true }));
+    ['pointerdown', 'pointerup', 'touchend'].forEach((type) => addEventListener(type, () => {
+        sfx.unlock();
+        startMusic();
+    }, { passive: true }));
 
     let wheelAt = 0;
     addEventListener('wheel', (e) => {
@@ -1076,14 +1086,17 @@
     }
 
     // ── start ──────────────────────────────────────────────
+    song.loop = true;
+    song.volume = 0.5;
     song.addEventListener('loadedmetadata', () => {
         if (state.screen === 'music') refreshScreen();
+        if (interacted) startMusic();
     });
 
     setSetting('sound', settings.sound);
     $('.tr-name').textContent = PROFILE.tag;
     $('.tr-score').replaceWith(scoreLine('tr-score'));
-    gamerpic($('.tr-pic'));
+    $('.tr-pic').src = PROFILE.gamerpic;
     resize();
     layoutChannels(false);
     chEls.forEach((el, i) => el.animate([{ opacity: 0 }, { opacity: el.style.opacity }], { duration: 600, delay: 100 + i * 60, fill: 'backwards' }));

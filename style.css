@@ -528,14 +528,13 @@ button:focus-visible { outline: none; }
 }
 
 /* ── disc tile ──────────────────────────────────────────── */
-.t-disc,
-.game-art {
+.t-disc {
     background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, .6)),
-        var(--art, none) center / cover no-repeat,
-        radial-gradient(120% 90% at 30% 15%, #8f8a6c, #4b4738 45%, #1b1a15 100%);
+        linear-gradient(180deg, rgba(14, 16, 17, 0) 44%, rgba(14, 16, 17, .92) 68%, #0e1011 74%),
+        var(--art, none) top center / 100% auto no-repeat,
+        #0e1011;
 }
-.game-art { background-color: #2a2820; }
+.game-art { background: var(--art, none) center / cover no-repeat, #1b1d1e; }
 .t-wrap {
     width: 290px;
     white-space: normal;
