@@ -68,9 +68,10 @@
         },
     ];
 
-    // Live 3D avatar from 360sona; assets/avatar.webp shows until it has loaded (and if it fails).
-    const AVATAR_EMBED = 'https://360sona.com/w/k_L8mXc3RxUG5gQwAkfsg';
+    // Idle loop recorded from the 360sona avatar: colour on the left half, alpha on the right.
+    // The still is its first frame, so the hand-off from image to video is seamless.
     const AVATAR_STILL = 'assets/avatar.webp';
+    const AVATAR_VIDEO = [['assets/avatar.mp4', 'video/mp4'], ['assets/avatar.webm', 'video/webm']];
 
     const GCOIN = '<svg class="gcoin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="#fff" stroke-width="1.7"/><text x="10" y="14.3" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="Segoe UI, Arial, sans-serif">G</text></svg>';
 
@@ -300,6 +301,11 @@
         song.play().catch(() => { musicStarted = false; });
     }
 
+    // Low-power modes can refuse muted autoplay; a user gesture always allows it.
+    function wakeAvatar() {
+        if (avatarVideo && avatarVideo.paused) avatarVideo.play().catch(() => {});
+    }
+
     function eject() {
         sfx.eject();
         toast('Disc tray open', true);
@@ -469,18 +475,76 @@
     still.alt = '';
     still.draggable = false;
     avatarEl.append(still);
-    if (AVATAR_EMBED) {
-        const live = document.createElement('iframe');
-        live.className = 'av-live';
-        live.src = AVATAR_EMBED;
-        live.title = `${PROFILE.tag}'s avatar`;
-        live.tabIndex = -1;
-        live.setAttribute('aria-hidden', 'true');
-        live.addEventListener('load', () => setTimeout(() => avatarEl.classList.add('live'), 3000));
-        avatarEl.append(live);
-    }
     avatarLayer.append(avatarEl);
     rowsEl.append(avatarLayer);
+    const avatarVideo = startAvatarVideo();
+
+    // Browsers can't play video with transparency everywhere (Safari), so the alpha travels as
+    // a second picture beside the colour and a tiny WebGL shader recombines them.
+    function startAvatarVideo() {
+        const view = make('canvas', 'av-anim');
+        const gl = view.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false });
+        if (!gl) return null;
+
+        const shader = (type, src) => {
+            const s = gl.createShader(type);
+            gl.shaderSource(s, src);
+            gl.compileShader(s);
+            return s;
+        };
+        const prog = gl.createProgram();
+        gl.attachShader(prog, shader(gl.VERTEX_SHADER,
+            'attribute vec2 p;varying vec2 uv;void main(){uv=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}'));
+        gl.attachShader(prog, shader(gl.FRAGMENT_SHADER,
+            'precision mediump float;varying vec2 uv;uniform sampler2D t;void main(){' +
+            'vec3 c=texture2D(t,vec2(uv.x*.5,uv.y)).rgb;float a=texture2D(t,vec2(.5+uv.x*.5,uv.y)).r;' +
+            'a=clamp((a-.02)/.96,0.,1.);gl_FragColor=vec4(min(c,vec3(a)),a);}'));
+        gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+        gl.useProgram(prog);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+        const loc = gl.getAttribLocation(prog, 'p');
+        gl.enableVertexAttribArray(loc);
+        gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+        gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+        [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR],
+            [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]
+            .forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
+
+        const video = make('video', 'av-src');
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.preload = 'auto';
+        video.setAttribute('muted', '');
+        video.setAttribute('playsinline', '');
+        AVATAR_VIDEO.forEach(([src, type]) => {
+            const s = make('source');
+            s.src = src;
+            s.type = type;
+            video.append(s);
+        });
+
+        const paint = () => {
+            if (video.readyState >= 2) {
+                if (view.width !== video.videoWidth / 2) {
+                    view.width = video.videoWidth / 2;
+                    view.height = video.videoHeight;
+                    gl.viewport(0, 0, view.width, view.height);
+                }
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                avatarEl.classList.add('live');
+            }
+            if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(paint);
+            else requestAnimationFrame(paint);
+        };
+        video.addEventListener('playing', paint, { once: true });
+        avatarEl.append(view, video);
+        video.play().catch(() => {});
+        return video;
+    }
 
     // Keeps the avatar standing at the right edge of its tile, upright (no tilt).
     function avatarStyle(k) {
@@ -830,6 +894,7 @@
         e.preventDefault();
         sfx.unlock();
         startMusic();
+        wakeAvatar();
         const isDir = action === 'left' || action === 'right' || action === 'up' || action === 'down';
         if (e.repeat && !isDir) return;
         if (isDir) {
@@ -844,6 +909,7 @@
     ['pointerdown', 'pointerup', 'touchend'].forEach((type) => addEventListener(type, () => {
         sfx.unlock();
         startMusic();
+        wakeAvatar();
     }, { passive: true }));
 
     let wheelAt = 0;
@@ -924,7 +990,7 @@
     function resize() {
         W = innerWidth;
         H = innerHeight;
-        DPR = Math.min(devicePixelRatio || 1, 2);
+        DPR = Math.min(devicePixelRatio || 1, 1.5);
         canvas.width = Math.round(W * DPR);
         canvas.height = Math.round(H * DPR);
         const portrait = W < H;
@@ -934,6 +1000,7 @@
         stage.style.transform = `translate(${OX}px, ${OY}px) scale(${S})`;
         stage.style.setProperty('--view-r', `${Math.min(1280, (W - OX) / S)}px`);
         stage.style.setProperty('--edge', portrait ? '24px' : '72px');
+        paintStatic();
         needsDraw = true;
     }
     addEventListener('resize', resize);
@@ -964,90 +1031,120 @@
     const ORB = { x: 1157, y: 664 };
     let clock = 0;
 
-    function drawBg() {
-        g.setTransform(DPR * S, 0, 0, DPR * S, DPR * OX, DPR * OY);
+    // Everything that doesn't move is painted once per resize; each frame only blits these
+    // layers and draws the drifting bokeh sprites and floor ripples.
+    const layer = () => document.createElement('canvas');
+    const backC = layer();
+    const floorC = layer();
+    const frontC = layer();
+    let sprites = [];
+
+    function paintStatic() {
+        const m = [DPR * S, 0, 0, DPR * S, DPR * OX, DPR * OY];
         const x0 = -OX / S - 2, y0 = -OY / S - 2, x1 = (W - OX) / S + 2, y1 = (H - OY) / S + 2;
+        for (const c of [backC, floorC, frontC]) {
+            c.width = canvas.width;
+            c.height = canvas.height;
+        }
 
-        const sky = g.createLinearGradient(0, -120, 0, 440);
-        sky.addColorStop(0, '#264203');
-        sky.addColorStop(0.2, '#44700c');
-        sky.addColorStop(0.42, '#6b9a20');
-        sky.addColorStop(0.66, '#a3bf78');
-        sky.addColorStop(0.82, '#d3e2c3');
-        sky.addColorStop(0.9, '#ecf2ea');
-        sky.addColorStop(1, '#f3f6f2');
-        g.fillStyle = sky;
-        g.fillRect(x0, y0, x1 - x0, y1 - y0);
-
-        const haze = g.createRadialGradient(820, 150, 0, 820, 150, 620);
+        let c = backC.getContext('2d');
+        c.setTransform(...m);
+        const sky = c.createLinearGradient(0, -120, 0, 440);
+        [[0, '#264203'], [0.2, '#44700c'], [0.42, '#6b9a20'], [0.66, '#a3bf78'], [0.82, '#d3e2c3'], [0.9, '#ecf2ea'], [1, '#f3f6f2']]
+            .forEach(([o, col]) => sky.addColorStop(o, col));
+        c.fillStyle = sky;
+        c.fillRect(x0, y0, x1 - x0, y1 - y0);
+        const haze = c.createRadialGradient(820, 150, 0, 820, 150, 620);
         haze.addColorStop(0, 'rgba(206,216,196,.55)');
         haze.addColorStop(1, 'rgba(206,216,196,0)');
-        g.fillStyle = haze;
-        g.fillRect(x0, y0, x1 - x0, y1 - y0);
+        c.fillStyle = haze;
+        c.fillRect(x0, y0, x1 - x0, y1 - y0);
 
+        c = floorC.getContext('2d');
+        c.setTransform(...m);
+        c.beginPath();
+        c.ellipse(FLOOR.cx, FLOOR.cy, FLOOR.rx, FLOOR.ry, 0, 0, Math.PI * 2);
+        const floor = c.createRadialGradient(640, 470, 0, 640, 470, 1150);
+        [[0, '#e3e7ea'], [0.16, '#bcc3ca'], [0.42, '#8f979e'], [0.75, '#656c72'], [1, '#4a5055']]
+            .forEach(([o, col]) => floor.addColorStop(o, col));
+        c.fillStyle = floor;
+        c.shadowColor = 'rgba(255,255,255,.9)';
+        c.shadowBlur = 24 * S * DPR;
+        c.fill();
+
+        c = frontC.getContext('2d');
+        c.setTransform(...m);
+        const vig = c.createRadialGradient(640, 330, 260, 640, 330, 1050);
+        vig.addColorStop(0, 'rgba(10,25,0,0)');
+        vig.addColorStop(1, 'rgba(10,25,0,.6)');
+        c.fillStyle = vig;
+        c.fillRect(x0, y0, x1 - x0, y1 - y0);
+
+        sprites = bokeh.map((b) => {
+            const box = b.r * 2 + 4;
+            const s = layer();
+            s.width = s.height = Math.max(2, Math.ceil(box * DPR * S));
+            const sg = s.getContext('2d');
+            sg.setTransform(s.width / box, 0, 0, s.width / box, 0, 0);
+            const cx = b.r + 2;
+            if (b.ring) {
+                sg.lineWidth = b.r > 40 ? 2 : 1.4;
+                for (let k = 0; k < 4; k++) {
+                    sg.strokeStyle = `rgba(255,255,255,${b.a * (1.7 - k * 0.3)})`;
+                    sg.beginPath();
+                    sg.arc(cx, cx, b.r * (1 - k * 0.24), 0, Math.PI * 2);
+                    sg.stroke();
+                }
+                sg.fillStyle = `rgba(255,255,255,${b.a * 0.35})`;
+            } else {
+                const grad = sg.createRadialGradient(cx, cx, 0, cx, cx, b.r);
+                grad.addColorStop(0, `rgba(255,255,255,${b.a * 0.6})`);
+                grad.addColorStop(0.82, `rgba(255,255,255,${b.a})`);
+                grad.addColorStop(1, 'rgba(255,255,255,0)');
+                sg.fillStyle = grad;
+            }
+            sg.beginPath();
+            sg.arc(cx, cx, b.r, 0, Math.PI * 2);
+            sg.fill();
+            return s;
+        });
+    }
+
+    function drawBg() {
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.drawImage(backC, 0, 0);
+
+        g.setTransform(DPR * S, 0, 0, DPR * S, DPR * OX, DPR * OY);
         const span = 1880;
-        for (const b of bokeh) {
+        bokeh.forEach((b, i) => {
             let x = b.x + clock * b.vx - cam.x * b.depth;
             x = ((x + 300) % span + span) % span - 300;
             let y = b.y + Math.sin(clock * 0.35 + b.phase) * 8 - cam.y * b.depth;
             y = ((y + 400) % 920 + 920) % 920 - 400;
-            if (b.ring) {
-                g.lineWidth = b.r > 40 ? 2 : 1.4;
-                for (let k = 0; k < 4; k++) {
-                    g.strokeStyle = `rgba(255,255,255,${b.a * (1.7 - k * 0.3)})`;
-                    g.beginPath();
-                    g.arc(x, y, b.r * (1 - k * 0.24), 0, Math.PI * 2);
-                    g.stroke();
-                }
-                g.fillStyle = `rgba(255,255,255,${b.a * 0.35})`;
-                g.beginPath();
-                g.arc(x, y, b.r, 0, Math.PI * 2);
-                g.fill();
-            } else {
-                const grad = g.createRadialGradient(x, y, 0, x, y, b.r);
-                grad.addColorStop(0, `rgba(255,255,255,${b.a * 0.6})`);
-                grad.addColorStop(0.82, `rgba(255,255,255,${b.a})`);
-                grad.addColorStop(1, 'rgba(255,255,255,0)');
-                g.fillStyle = grad;
-                g.beginPath();
-                g.arc(x, y, b.r, 0, Math.PI * 2);
-                g.fill();
-            }
-        }
+            g.drawImage(sprites[i], x - b.r - 2, y - b.r - 2, b.r * 2 + 4, b.r * 2 + 4);
+        });
 
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.drawImage(floorC, 0, 0);
+
+        g.setTransform(DPR * S, 0, 0, DPR * S, DPR * OX, DPR * OY);
         g.save();
         g.beginPath();
         g.ellipse(FLOOR.cx, FLOOR.cy, FLOOR.rx, FLOOR.ry, 0, 0, Math.PI * 2);
-        const floor = g.createRadialGradient(640, 470, 0, 640, 470, 1150);
-        floor.addColorStop(0, '#e3e7ea');
-        floor.addColorStop(0.16, '#bcc3ca');
-        floor.addColorStop(0.42, '#8f979e');
-        floor.addColorStop(0.75, '#656c72');
-        floor.addColorStop(1, '#4a5055');
-        g.fillStyle = floor;
-        g.shadowColor = 'rgba(255,255,255,.9)';
-        g.shadowBlur = 24 * S * DPR;
-        g.fill();
-        g.shadowBlur = 0;
         g.clip();
-
+        g.lineWidth = 1.5;
         for (let i = 0; i < 6; i++) {
             const p = (clock / 7 + i / 6) % 1;
             const rx = 46 + p * 540;
-            const a = (1 - p) * 0.5 * Math.min(1, p * 6);
-            g.strokeStyle = `rgba(236,240,244,${a})`;
-            g.lineWidth = 1.5;
+            g.strokeStyle = `rgba(236,240,244,${(1 - p) * 0.5 * Math.min(1, p * 6)})`;
             g.beginPath();
             g.ellipse(ORB.x, ORB.y, rx, rx * 0.2, 0, 0, Math.PI * 2);
             g.stroke();
         }
         g.restore();
 
-        const vig = g.createRadialGradient(640, 330, 260, 640, 330, 1050);
-        vig.addColorStop(0, 'rgba(10,25,0,0)');
-        vig.addColorStop(1, 'rgba(10,25,0,.6)');
-        g.fillStyle = vig;
-        g.fillRect(x0, y0, x1 - x0, y1 - y0);
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.drawImage(frontC, 0, 0);
     }
 
     let last = performance.now();
