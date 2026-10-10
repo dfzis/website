@@ -119,8 +119,7 @@ button:focus-visible { outline: none; }
     -webkit-box-reflect: below 3px linear-gradient(transparent 78%, rgba(255, 255, 255, .16));
     transition: transform .45s var(--ease), opacity .3s ease, filter .2s ease;
 }
-.row.no-anim .tile,
-.row.no-anim .avatar { transition: none; }
+.row.no-anim .tile { transition: none; }
 .tile:not(.focus):hover { filter: brightness(1.06); }
 
 .t-title,
@@ -496,39 +495,63 @@ button:focus-visible { outline: none; }
     white-space: nowrap;
 }
 
+.avatar-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 70;
+    pointer-events: none;
+}
+/* Box matches the 320x500 360sona widget scaled to .869; the figure's feet sit at (140, 415). */
 .avatar {
     position: absolute;
     left: 0;
     top: 0;
-    width: 128px;
-    height: 390px;
+    width: 278px;
+    height: 435px;
     transform-origin: 0 0;
-    pointer-events: none;
-    z-index: 70;
     transition: transform .45s var(--ease), opacity .3s ease;
-}
-.avatar img {
-    position: relative;
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: 50% 100%;
-    transform-origin: 50% 100%;
-    animation: av-breathe 4s ease-in-out infinite;
 }
 .avatar::before {
     content: "";
     position: absolute;
-    left: 50%;
-    bottom: -7px;
+    left: 140px;
+    top: 406px;
     width: 120px;
     height: 18px;
     transform: translateX(-50%);
     border-radius: 50%;
     background: radial-gradient(closest-side, rgba(20, 30, 10, .4), rgba(20, 30, 10, 0));
 }
-.still .avatar img { animation-play-state: paused; }
+.av-still {
+    position: absolute;
+    left: 76px;
+    top: 25px;
+    width: 128px;
+    height: 390px;
+    object-fit: contain;
+    object-position: 50% 100%;
+    transform-origin: 50% 100%;
+    animation: av-breathe 4s ease-in-out infinite;
+    transition: opacity .6s ease;
+}
+.av-live {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 320px;
+    height: 500px;
+    border: 0;
+    background: transparent;
+    transform: scale(.869);
+    transform-origin: 0 0;
+    clip-path: inset(0 0 17px 0);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .6s ease;
+}
+.avatar.live .av-live { opacity: 1; }
+.avatar.live .av-still { opacity: 0; }
+.still .av-still { animation-play-state: paused; }
 @keyframes av-breathe {
     0%, 100% { transform: scaleY(1); }
     50% { transform: scaleY(1.006); }

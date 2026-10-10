@@ -68,7 +68,9 @@
         },
     ];
 
-    const AVATAR = '<img src="assets/avatar.webp" alt="" draggable="false">';
+    // Live 3D avatar from 360sona; assets/avatar.webp shows until it has loaded (and if it fails).
+    const AVATAR_EMBED = 'https://360sona.com/w/k_L8mXc3RxUG5gQwAkfsg';
+    const AVATAR_STILL = 'assets/avatar.webp';
 
     const GCOIN = '<svg class="gcoin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="#fff" stroke-width="1.7"/><text x="10" y="14.3" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="Segoe UI, Arial, sans-serif">G</text></svg>';
 
@@ -453,23 +455,38 @@
             el.append(tile);
             return tile;
         });
-        let avatar = null;
-        const at = CHANNELS[ci].tiles.findIndex((t) => t.kind === 'gamercard');
-        if (at >= 0) {
-            const a = make('div', 'avatar');
-            a.innerHTML = AVATAR;
-            el.append(a);
-            avatar = { el: a, index: at };
-        }
         rowsEl.append(el);
-        return { el, tiles, ci, avatar };
+        return { el, tiles, ci };
     }
+
+    // One avatar for the whole session: re-parenting or rebuilding the iframe would reload it.
+    const AV_CH = CHANNELS.findIndex((c) => c.tiles.some((t) => t.kind === 'gamercard'));
+    const AV_TILE = AV_CH < 0 ? -1 : CHANNELS[AV_CH].tiles.findIndex((t) => t.kind === 'gamercard');
+    const avatarLayer = make('div', 'avatar-layer');
+    const avatarEl = make('div', 'avatar');
+    const still = make('img', 'av-still');
+    still.src = AVATAR_STILL;
+    still.alt = '';
+    still.draggable = false;
+    avatarEl.append(still);
+    if (AVATAR_EMBED) {
+        const live = document.createElement('iframe');
+        live.className = 'av-live';
+        live.src = AVATAR_EMBED;
+        live.title = `${PROFILE.tag}'s avatar`;
+        live.tabIndex = -1;
+        live.setAttribute('aria-hidden', 'true');
+        live.addEventListener('load', () => setTimeout(() => avatarEl.classList.add('live'), 3000));
+        avatarEl.append(live);
+    }
+    avatarLayer.append(avatarEl);
+    rowsEl.append(avatarLayer);
 
     // Keeps the avatar standing at the right edge of its tile, upright (no tilt).
     function avatarStyle(k) {
         if (k < 0) return { t: `translate(${-470 + k * 40}px, 0px) scale(1)`, o: 0 };
         const v = TILE_POS[Math.min(k, TILE_POS.length - 1)];
-        return { t: `translate(${v.x + v.s * 290}px, ${v.top - v.s * 27}px) scale(${v.s})`, o: k >= TILE_POS.length ? 0 : 1 };
+        return { t: `translate(${v.x + v.s * 214}px, ${v.top - v.s * 52}px) scale(${v.s})`, o: k >= TILE_POS.length ? 0 : 1 };
     }
 
     const enterAnim = (el, st, delay) => el.animate(
@@ -487,11 +504,11 @@
             el.classList.toggle('focus', i === f);
             if (enterFromRight) enterAnim(el, st, 120 + i * 60);
         });
-        if (row.avatar) {
-            const st = avatarStyle(row.avatar.index - f);
-            row.avatar.el.style.transform = st.t;
-            row.avatar.el.style.opacity = st.o;
-            if (enterFromRight) enterAnim(row.avatar.el, st, 120 + row.avatar.index * 60);
+        if (state.ch === AV_CH) {
+            const st = avatarStyle(AV_TILE - f);
+            avatarEl.style.transform = st.t;
+            avatarEl.style.opacity = st.o;
+            if (enterFromRight) enterAnim(avatarEl, st, 120 + AV_TILE * 60);
         }
         countEl.textContent = `${f + 1} of ${row.tiles.length}`;
         renderLegend();
@@ -549,6 +566,13 @@
         old.el.animate([{ transform: 'none', opacity: 1 }, { transform: `translateY(${-dir * 90}px)`, opacity: 0 }], { duration: 360, easing: ease, fill: 'forwards' })
             .finished.then(() => old.el.remove(), () => old.el.remove());
         row.el.animate([{ transform: `translateY(${dir * 90}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
+
+        if (old.ci === AV_CH) {
+            avatarLayer.animate([{ transform: 'none', opacity: 1 }, { transform: `translateY(${-dir * 90}px)`, opacity: 0 }], { duration: 360, easing: ease, fill: 'forwards' });
+        } else if (i === AV_CH) {
+            avatarLayer.getAnimations().forEach((a) => a.cancel());
+            avatarLayer.animate([{ transform: `translateY(${dir * 90}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
+        }
 
         layoutChannels(true);
     }
