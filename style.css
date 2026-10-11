@@ -373,7 +373,6 @@ button:focus-visible { outline: none; }
     background: var(--lime);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 8px 20px rgba(0, 0, 0, .25);
 }
-.art .glyph { width: 120px; height: 120px; top: 50%; }
 .pl-info { flex: 1; min-width: 0; }
 .pl-title {
     font-size: 36px;
@@ -384,30 +383,6 @@ button:focus-visible { outline: none; }
     white-space: nowrap;
 }
 .pl-sub { margin-top: 4px; font-size: 20px; opacity: .8; }
-.pl-bar {
-    margin-top: 26px;
-    height: 10px;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, .28);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35);
-    overflow: hidden;
-}
-.pl-bar i {
-    display: block;
-    width: 0;
-    height: 100%;
-    border-radius: 5px;
-    background: linear-gradient(180deg, #f4f9b0, #b8dd2c 50%, #86b313);
-    box-shadow: 0 0 10px rgba(200, 255, 80, .6);
-}
-.pl-time {
-    margin-top: 8px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 18px;
-    font-variant-numeric: tabular-nums;
-    opacity: .85;
-}
 
 /* ── legend, orb, toast ─────────────────────────────────── */
 #legend {
@@ -1064,4 +1039,80 @@ button:focus-visible { outline: none; }
         transition-duration: .01s !important;
         animation-duration: .01s !important;
     }
+}
+
+/* ── game library ───────────────────────────────────────── */
+.panel.library {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 0 28px 0 30px;
+    overflow: hidden;
+}
+.library .pl-title { font-size: 32px; }
+.library .pl-sub + .pl-sub { margin-top: 18px; font-size: 18px; opacity: .7; }
+.disc-spin {
+    position: relative;
+    flex-shrink: 0;
+    width: 264px;
+    height: 264px;
+    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .35));
+}
+.disc-spin.inserting { animation: disc-insert .6s cubic-bezier(.55, 0, .8, .3) forwards; }
+.disc,
+.disc-sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    -webkit-mask: radial-gradient(circle closest-side, transparent 0 12.5%, #000 13.3%);
+    mask: radial-gradient(circle closest-side, transparent 0 12.5%, #000 13.3%);
+}
+.disc {
+    overflow: hidden;
+    animation: disc-spin 2.6s linear infinite, disc-show .25s ease-out;
+}
+.disc-face {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* No disc photo: print the game's art on a generic 360 disc (label band, clear hub, rim). */
+.disc.printed {
+    background:
+        radial-gradient(circle closest-side, rgba(236, 241, 245, .92) 0 21%, rgba(176, 190, 200, .7) 21.6% 29.4%, rgba(255, 255, 255, .9) 30% 31.4%, rgba(120, 130, 138, .5) 31.8% 33%, transparent 33.4% 96.6%, rgba(255, 255, 255, .55) 97% 98%, rgba(165, 175, 182, .95) 98.4%),
+        var(--art, none) center 70% / cover no-repeat,
+        #1d2022;
+}
+.disc-band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 25%;
+    padding-bottom: 9px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: #5b605d;
+    text-shadow: none;
+    background: linear-gradient(180deg, #f6f7f5, #e1e4e0);
+    border-bottom: 3px solid #6cc04a;
+}
+/* Fixed glare over the spinning disc. */
+.disc-sheen {
+    pointer-events: none;
+    background:
+        conic-gradient(from 25deg, rgba(255, 255, 255, 0) 0deg, rgba(255, 255, 255, .32) 28deg, rgba(255, 255, 255, 0) 60deg 180deg, rgba(255, 255, 255, .22) 210deg, rgba(255, 255, 255, 0) 242deg),
+        radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 45%);
+    mix-blend-mode: screen;
+}
+@keyframes disc-spin { to { transform: rotate(360deg); } }
+@keyframes disc-show { from { opacity: 0; scale: .9; } }
+@keyframes disc-insert { to { transform: translate(-40px, 10px) scale(.55); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .disc { animation: none !important; }
 }

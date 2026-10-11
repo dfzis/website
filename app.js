@@ -17,8 +17,11 @@
         discord: { name: 'Discord', handle: 'mewzah', copy: 'mewzah' },
     };
 
-    const GAME = { title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg' };
-    const SONG = { title: 'Zen Garden', artist: 'Xbox 360 Ambience' };
+    // Game Library. The first game starts in the disc tray; visitors can swap games (remembered per browser).
+    // art is the dashboard tile banner; disc is an optional cut-out disc image (a printed disc is drawn otherwise).
+    const GAMES = [
+        { id: 'cod4', title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg' },
+    ];
 
     // Sponsor. code shows "Use code …" and a copy button on the Geobox screen (null hides them).
     const GEOBOX = {
@@ -42,8 +45,6 @@
         discord: 'M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z',
         x: 'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z',
         controller: 'M6.6 5.5h10.8c2.6 0 4.3 1.9 4.8 4.5l1.1 5.9c.4 2.3-1.1 4.1-3.1 4.1-1.3 0-2.3-.7-3-1.9L16 15.7H8l-1.2 2.4c-.7 1.2-1.7 1.9-3 1.9-2 0-3.5-1.8-3.1-4.1L1.8 10c.5-2.6 2.2-4.5 4.8-4.5zM6 8.6v1.9H4.1v1.8H6v1.9h1.8v-1.9h1.9v-1.8H7.8V8.6zm11.1-.1a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm-2.2 2.2a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm4.4 0a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm-2.2 2.2a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1z',
-        camera: 'M6.5 2.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm8.5-1a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM2.5 11h14.5v9H2.5zM17.5 14.5l4.5-3v8l-4.5-3z',
-        note: 'M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z',
         gear: 'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
     };
 
@@ -52,37 +53,44 @@
         return { label: s.name, icon: key, href: s.href, copy: s.copy };
     }
 
+    let game = GAMES[0];
+    try {
+        game = GAMES.find((g) => g.id === localStorage.getItem('mz.game')) || game;
+    } catch { /* storage unavailable */ }
+
+    const discTile = {
+        kind: 'disc',
+        label: `Play ${game.short}`,
+        screen: 'game',
+        extra: [['x', 'Eject', eject], ['y', 'Game Details', () => openScreen('game')]],
+    };
+
     const CHANNELS = [
         {
             name: 'Friends',
-            tiles: [social('discord'), social('x')],
+            tiles: [{ kind: 'geobox', label: 'Geobox', screen: 'geobox' }],
         },
         {
-            name: 'Video Marketplace',
+            name: 'Socials',
             tiles: [
                 { label: 'YouTube', icon: 'youtube', screen: 'youtube' },
                 { label: 'Twitch', icon: 'twitch', screen: 'twitch' },
                 social('tiktok'),
+                social('x'),
+                social('discord'),
             ],
         },
         {
             name: 'My Xbox',
             tiles: [
-                {
-                    kind: 'disc',
-                    label: `Play ${GAME.short}`,
-                    screen: 'game',
-                    extra: [['x', 'Eject', eject], ['y', 'Game Details', () => openScreen('game')]],
-                },
+                discTile,
                 { kind: 'gamercard', label: 'Gamer Profile', screen: 'profile' },
-                { kind: 'geobox', label: 'Geobox', screen: 'geobox' },
-                { label: 'Game Library', icon: 'controller', screen: 'game' },
-                { label: 'Video Library', icon: 'camera', go: 'Video Marketplace' },
-                { label: 'Music Library', icon: 'note', screen: 'music' },
+                { label: 'Game Library', icon: 'controller', screen: 'library' },
                 { label: 'System Settings', icon: 'gear', screen: 'settings' },
             ],
         },
     ];
+    const DISC_CH = CHANNELS.findIndex((c) => c.tiles.includes(discTile));
 
     // Idle loop recorded from the 360sona avatar: colour on the left half, alpha on the right.
     // The still is its first frame, so the hand-off from image to video is seamless.
@@ -279,7 +287,6 @@
     const glyph = (name) =>
         `<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path fill="url(#glyph-fill)" fill-rule="evenodd" d="${ICONS[name]}"/></svg>`;
     const icon = (name, cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
-    const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
     const songReady = () => song.readyState >= 1 && Number.isFinite(song.duration);
     const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
     const statText = (s) => (s.count == null ? s.handle : `${compact.format(s.count)} ${s.unit}`);
@@ -476,7 +483,7 @@
             }
         } else if (t.kind === 'disc') {
             el.classList.add('t-disc');
-            el.style.setProperty('--art', `url("${GAME.art}")`);
+            el.style.setProperty('--art', `url("${game.art}")`);
             el.append(make('span', 't-label t-wrap', t.label), make('span', 'disc-badge'));
         } else {
             el.insertAdjacentHTML('beforeend', glyph(t.icon));
@@ -693,10 +700,6 @@
         if (t.href) openLink(t.href, src);
         else if (t.copy) copyText(t.copy);
         else if (t.screen) openScreen(t.screen);
-        else if (t.go) {
-            const i = CHANNELS.findIndex((c) => c.name === t.go);
-            gotoChannel(i, i < state.ch ? -1 : 1);
-        }
     }
 
     function back() {
@@ -718,8 +721,8 @@
         youtube: { title: 'YouTube', render: renderYouTube },
         twitch: { title: 'Twitch', render: renderTwitch },
         game: { title: 'Game Details', render: renderGame },
+        library: { title: 'Game Library', render: renderLibrary },
         geobox: { title: 'Geobox', render: renderGeobox },
-        music: { title: 'Music Library', render: renderMusic },
         settings: { title: 'System Settings', render: renderSettings },
     };
 
@@ -903,58 +906,94 @@
     function renderGame(body) {
         const panel = make('div', 'panel player');
         const art = make('div', 'art game-art');
-        art.style.setProperty('--art', `url("${GAME.art}")`);
+        art.style.setProperty('--art', `url("${game.art}")`);
         const info = make('div', 'pl-info');
-        info.append(make('p', 'pl-title wrap', GAME.title), make('p', 'pl-sub', 'Xbox 360'));
+        info.append(make('p', 'pl-title wrap', game.title), make('p', 'pl-sub', 'Xbox 360'));
         panel.append(art, info);
         const list = make('div', 'list');
         body.append(panel, list);
-        return [item(list, 'Eject Disc', eject)];
+        return [item(list, 'Eject Disc', eject), item(list, 'Game Library', () => openScreen('library'))];
     }
 
-    function renderMusic(body) {
-        const panel = make('div', 'panel player');
-        const art = make('div', 'art');
-        art.innerHTML = glyph('note');
-        const info = make('div', 'pl-info');
-        panel.append(art, info);
-        body.append(panel);
-
-        if (!songReady()) {
-            info.append(make('p', 'pl-title', 'Nothing playing'), make('p', 'pl-sub', 'No music found'));
-            return [];
+    function discFor(g) {
+        const disc = make('div', 'disc');
+        if (g.disc) {
+            const img = make('img', 'disc-face');
+            img.src = g.disc;
+            img.alt = '';
+            disc.append(img);
+        } else {
+            disc.classList.add('printed');
+            disc.style.setProperty('--art', `url("${g.art}")`);
+            disc.append(make('span', 'disc-band', 'XBOX 360'));
         }
-        const bar = make('div', 'pl-bar');
-        bar.append(make('i'));
-        const time = make('p', 'pl-time');
-        time.append(make('span', 'cur', '0:00'), make('span', '', fmtTime(song.duration)));
-        info.append(make('p', 'pl-title', SONG.title), make('p', 'pl-sub', SONG.artist), bar, time);
-        updateMusic();
+        return disc;
+    }
 
-        const list = make('div', 'list');
-        body.append(list);
-        const playItem = item(list, song.paused ? 'Play' : 'Pause', () => {
-            if (song.paused) song.play();
-            else song.pause();
-        });
-        const restart = item(list, 'Restart', () => {
-            song.currentTime = 0;
-            song.play();
-        });
-        song.onplay = song.onpause = () => {
-            playItem.el.querySelector('.lbl').textContent = song.paused ? 'Play' : 'Pause';
+    // Spinning disc of the highlighted game; A puts it in the tray and swaps the dashboard's disc tile.
+    function renderLibrary(body) {
+        const panel = make('div', 'panel library');
+        const spin = make('div', 'disc-spin');
+        const info = make('div', 'pl-info');
+        const title = make('p', 'pl-title wrap');
+        const sub = make('p', 'pl-sub');
+        info.append(title, make('p', 'pl-sub', 'Xbox 360'), sub);
+        spin.append(make('div', 'disc-sheen'));
+        panel.append(spin, info);
+        const list = make('div', 'list compact');
+        list.append(make('p', 'list-head', `${GAMES.length} ${GAMES.length === 1 ? 'game' : 'games'}`));
+        body.append(panel, list);
+
+        let shown = null;
+        const show = (g) => {
+            if (g === shown) return;
+            shown = g;
+            const old = spin.querySelector('.disc');
+            if (old) old.remove();
+            spin.prepend(discFor(g));
+            title.textContent = g.title;
+            sub.textContent = g === game ? 'In the disc tray' : 'Press A to play';
         };
-        return [playItem, restart];
+        const entries = GAMES.map((g) => {
+            const entry = item(list, g.short, () => insertGame(g, spin), g === game ? 'In tray' : undefined);
+            entry.focus = () => show(g);
+            return entry;
+        });
+        state.sel = Math.max(0, GAMES.indexOf(game));
+        return entries;
     }
 
-    function updateMusic() {
-        if (state.screen !== 'music' || !songReady()) return;
-        const fill = screenEl.querySelector('.pl-bar i');
-        const cur = screenEl.querySelector('.pl-time .cur');
-        if (fill) fill.style.width = `${(song.currentTime / song.duration) * 100}%`;
-        if (cur) cur.textContent = fmtTime(song.currentTime);
+    function insertGame(g, spin) {
+        if (g === game) {
+            closeScreen();
+            focusDiscTile();
+            return;
+        }
+        sfx.eject();
+        spin.classList.add('inserting');
+        game = g;
+        try {
+            localStorage.setItem('mz.game', g.id);
+        } catch { /* storage unavailable */ }
+        discTile.label = `Play ${g.short}`;
+        setTimeout(() => {
+            closeScreen();
+            const tile = row.ci === DISC_CH ? row.tiles[CHANNELS[DISC_CH].tiles.indexOf(discTile)] : null;
+            if (tile) {
+                tile.setAttribute('aria-label', discTile.label);
+                tile.style.setProperty('--art', `url("${g.art}")`);
+                tile.querySelector('.t-label').textContent = discTile.label;
+            }
+            focusDiscTile();
+            sfx.notify();
+            toast(`${g.short} inserted`);
+        }, 650);
     }
-    song.addEventListener('timeupdate', updateMusic);
+
+    function focusDiscTile() {
+        const d = CHANNELS[DISC_CH].tiles.indexOf(discTile) - state.focus[state.ch];
+        if (row.ci === DISC_CH && d) moveTile(d);
+    }
 
     function renderSettings(body) {
         const list = make('div', 'list wide');
@@ -979,6 +1018,8 @@
 
     function highlight() {
         state.items.forEach((it, i) => it.el.classList.toggle('sel', i === state.sel));
+        const cur = state.items[state.sel];
+        if (cur && cur.focus) cur.focus();
     }
 
     function renderScreen() {
@@ -1058,7 +1099,7 @@
                 else if (focused && focused.cycle) {
                     focused.cycle(d);
                     sfx.move();
-                } else if (state.screen === 'music' && songReady()) song.currentTime = Math.max(0, Math.min(song.duration, song.currentTime + d * 10));
+                }
                 break;
             }
             case 'up':
@@ -1366,7 +1407,6 @@
     song.loop = true;
     song.volume = 0.5;
     song.addEventListener('loadedmetadata', () => {
-        if (state.screen === 'music') refreshScreen();
         if (interacted) startMusic();
     });
 
