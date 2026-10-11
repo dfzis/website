@@ -4,7 +4,6 @@
     const PROFILE = {
         tag: 'mewzah',
         gamerscore: 999,
-        bio: 'living in a long forgotten world',
         location: 'グランド・エクスチェンジ',
         gamerpic: 'assets/gamerpic.png',
     };
@@ -715,7 +714,7 @@
         const dl = make('dl');
         const loc = make('dd', '', PROFILE.location);
         loc.lang = 'ja';
-        dl.append(make('dt', '', 'Bio'), make('dd', '', PROFILE.bio), make('dt', '', 'Location'), loc);
+        dl.append(make('dt', '', 'Location'), loc);
         info.append(make('p', 'gc-tag', PROFILE.tag), scoreLine('gc-score'), status, dl);
         card.append(pic, info);
 
