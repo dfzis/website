@@ -10,7 +10,7 @@
 
     // count: a number shows "12.5K followers"; null shows the handle instead.
     const SOCIALS = {
-        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: 32000, unit: 'subscribers', uploads: 'UUEPXFafBx8AEAU7EnARmSnw' },
+        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: 32000, unit: 'subscribers', uploads: 'UULFEPXFafBx8AEAU7EnARmSnw' },
         twitch: { name: 'Twitch', handle: 'mewzah', href: 'https://www.twitch.tv/mewzah', count: 4400, unit: 'followers' },
         tiktok: { name: 'TikTok', handle: 'new account', href: 'https://www.tiktok.com/@mewzah', count: null, unit: 'followers' },
         x: { name: 'X', handle: '@mewzah1', href: 'https://x.com/mewzah1', count: 1600, unit: 'followers' },
