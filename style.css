@@ -1072,10 +1072,15 @@ button:focus-visible { outline: none; }
     animation: disc-spin 2.6s linear infinite, disc-show .25s ease-out;
 }
 .disc-face {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    position: absolute;
+    inset: 1.6%;
+    width: 96.8%;
+    height: 96.8%;
+    border-radius: 50%;
+}
+/* Clear plastic rim around a disc photo. */
+.disc:not(.printed) {
+    background: radial-gradient(circle closest-side, transparent 96%, rgba(255, 255, 255, .75) 96.8% 97.6%, rgba(196, 204, 210, .85) 98.4%, rgba(140, 150, 158, .9) 100%);
 }
 /* No disc photo: print the game's art on a generic 360 disc (label band, clear hub, rim). */
 .disc.printed {

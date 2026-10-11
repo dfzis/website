@@ -20,7 +20,9 @@
     // Game Library. The first game starts in the disc tray; visitors can swap games (remembered per browser).
     // art is the dashboard tile banner; disc is an optional cut-out disc image (a printed disc is drawn otherwise).
     const GAMES = [
-        { id: 'cod4', title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg' },
+        { id: 'cod4', title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg', disc: 'assets/disc-cod4.webp' },
+        { id: 'mw2', title: 'Call of Duty: Modern Warfare 2', short: 'Modern Warfare® 2', art: 'assets/mw2.jpg', disc: 'assets/disc-mw2.webp' },
+        { id: 'halo3', title: 'Halo 3', short: 'Halo 3', art: 'assets/halo3.jpg', disc: 'assets/disc-halo3.webp' },
     ];
 
     // Sponsor. code shows "Use code …" and a copy button on the Geobox screen (null hides them).
