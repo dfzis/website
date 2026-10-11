@@ -106,7 +106,7 @@ button:focus-visible { outline: none; }
 }
 
 #stage {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 1280px;
@@ -117,7 +117,7 @@ button:focus-visible { outline: none; }
 /* ── channels ───────────────────────────────────────────── */
 #channels {
     position: absolute;
-    left: 96px;
+    left: var(--m, 96px);
     top: 0;
     width: 900px;
     height: 224px;
@@ -137,7 +137,7 @@ button:focus-visible { outline: none; }
 /* ── tile row ───────────────────────────────────────────── */
 #rows {
     position: absolute;
-    left: 96px;
+    left: var(--m, 96px);
     top: 248px;
     width: 420px;
     height: 320px;
@@ -207,7 +207,7 @@ button:focus-visible { outline: none; }
 
 #count {
     position: absolute;
-    left: 96px;
+    left: var(--m, 96px);
     top: 576px;
     font-size: 18px;
     color: rgba(64, 68, 74, .92);
@@ -226,6 +226,8 @@ button:focus-visible { outline: none; }
     transform: translateX(-140px);
     pointer-events: none;
 }
+/* not quite 0: the row holds the WebGL avatar, and a fully hidden layer is rebuilt (slowly) when it comes back */
+.in-screen #rows { opacity: .001; }
 
 /* ── screens ────────────────────────────────────────────── */
 #screen {
@@ -244,7 +246,7 @@ button:focus-visible { outline: none; }
 }
 .crumb {
     position: absolute;
-    left: 96px;
+    left: var(--m, 96px);
     top: 132px;
     font-size: 26px;
     opacity: .68;
@@ -252,7 +254,7 @@ button:focus-visible { outline: none; }
 }
 .title {
     position: absolute;
-    left: 96px;
+    left: var(--m, 96px);
     top: 168px;
     font-size: 44px;
     font-weight: 600;
@@ -261,7 +263,7 @@ button:focus-visible { outline: none; }
 }
 .body {
     position: absolute;
-    left: 96px;
+    left: var(--m, 96px);
     top: 248px;
     width: 1088px;
     height: 320px;
@@ -387,8 +389,8 @@ button:focus-visible { outline: none; }
 /* ── legend, orb, toast ─────────────────────────────────── */
 #legend {
     position: absolute;
-    left: 96px;
-    top: 636px;
+    left: var(--m, 96px);
+    top: calc(var(--view-b, 720px) - 84px);
     display: flex;
     gap: 30px;
 }
@@ -535,6 +537,7 @@ button:focus-visible { outline: none; }
     height: 435px;
     transform-origin: 0 0;
     transition: transform .45s var(--ease), opacity .3s ease;
+    will-change: transform, opacity; /* keeps the WebGL avatar on its own layer so moving it never repaints */
 }
 .avatar::before {
     content: "";
@@ -644,8 +647,8 @@ button:focus-visible { outline: none; }
 
 #toast {
     position: absolute;
-    left: 50%;
-    top: 606px;
+    left: calc(var(--view-r, 1280px) / 2);
+    top: calc(var(--view-b, 720px) - 114px);
     min-width: 380px;
     height: 58px;
     padding: 0 24px 0 14px;
@@ -1034,11 +1037,10 @@ button:focus-visible { outline: none; }
     to { opacity: 1; transform: none; }
 }
 
+/* Reduced motion: the ambient loops stop; navigation transitions are short and user-triggered, so they stay. */
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        transition-duration: .01s !important;
-        animation-duration: .01s !important;
-    }
+    .is-live .live-badge,
+    .boot-orb { animation: none !important; }
 }
 
 /* ── game library ───────────────────────────────────────── */
@@ -1138,8 +1140,8 @@ button:focus-visible { outline: none; }
 /* ── achievement toast (xbox 360) ───────────────────────── */
 .ach {
     position: absolute;
-    left: 50%;
-    top: 594px;
+    left: calc(var(--view-r, 1280px) / 2);
+    top: calc(var(--view-b, 720px) - 126px);
     height: 70px;
     transform: translateX(-50%);
     visibility: hidden;
@@ -1231,3 +1233,17 @@ button:focus-visible { outline: none; }
 .scroller .item { flex-shrink: 0; }
 .item.locked .lbl { opacity: .62; }
 .item.has-link .val::after { content: " ↗"; }
+
+/* ── phones (portrait) ──────────────────────────────────── */
+.portrait #orb { display: none; }
+.portrait #toast { min-width: 0; max-width: calc(var(--view-r, 1280px) - 48px); }
+.portrait .body > .list,
+.portrait .body > .panel { transform-origin: 0 0; }
+.portrait .body > .list {
+    overflow: hidden;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+/* on phones the legend spans the width, so pop-ups sit above it */
+.portrait .ach { top: calc(var(--view-b, 720px) - 172px); }
+.portrait #toast { top: calc(var(--view-b, 720px) - 160px); }

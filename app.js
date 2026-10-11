@@ -829,10 +829,13 @@
     }
 
     // Keeps the avatar standing at the right edge of its tile, upright (no tilt).
+    // Hidden means 0.001, not 0: at zero opacity browsers drop the WebGL layer, and rebuilding it
+    // when the avatar comes back stalls phones for long enough to swallow the slide animation.
+    const AV_HIDDEN = 0.001;
     function avatarStyle(k) {
-        if (k < 0) return { t: `translate(${-470 + k * 40}px, 0px) scale(1)`, o: 0 };
+        if (k < 0) return { t: `translate(${-470 + k * 40}px, 0px) scale(1)`, o: AV_HIDDEN };
         const v = TILE_POS[Math.min(k, TILE_POS.length - 1)];
-        return { t: `translate(${v.x + v.s * 214}px, ${v.top - v.s * 52}px) scale(${v.s})`, o: k >= TILE_POS.length ? 0 : 1 };
+        return { t: `translate(${v.x + v.s * 214}px, ${v.top - v.s * 52}px) scale(${v.s})`, o: k >= TILE_POS.length ? AV_HIDDEN : 1 };
     }
 
     const enterAnim = (el, st, delay) => el.animate(
@@ -917,10 +920,10 @@
         row.el.animate([{ transform: `translateY(${dir * 90}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
 
         if (old.ci === AV_CH) {
-            avatarLayer.animate([{ transform: 'none', opacity: 1 }, { transform: `translateY(${-dir * 90}px)`, opacity: 0 }], { duration: 360, easing: ease, fill: 'forwards' });
+            avatarLayer.animate([{ transform: 'none', opacity: 1 }, { transform: `translateY(${-dir * 90}px)`, opacity: AV_HIDDEN }], { duration: 360, easing: ease, fill: 'forwards' });
         } else if (i === AV_CH) {
             avatarLayer.getAnimations().forEach((a) => a.cancel());
-            avatarLayer.animate([{ transform: `translateY(${dir * 90}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
+            avatarLayer.animate([{ transform: `translateY(${dir * 90}px)`, opacity: AV_HIDDEN }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
         }
 
         layoutChannels(true);
@@ -1261,13 +1264,53 @@
         return el;
     }
 
-    // Scrolls a list by whole rows so the selected row is fully in view.
+    // Scrolls a clipped list so the selected row is fully in view (by whole rows when the list is all rows).
     function keepVisible(box, el) {
+        const rowsOnly = box.classList.contains('scroller');
         const stride = el.offsetHeight + 6;
         let top = box.scrollTop;
-        if (el.offsetTop < top) top = el.offsetTop;
-        else if (el.offsetTop + el.offsetHeight > top + box.clientHeight) top = Math.ceil((el.offsetTop + el.offsetHeight - box.clientHeight) / stride) * stride;
+        if (el.offsetTop < top) top = rowsOnly ? el.offsetTop : Math.max(0, el.offsetTop - 8);
+        else if (el.offsetTop + el.offsetHeight > top + box.clientHeight) {
+            const need = el.offsetTop + el.offsetHeight - box.clientHeight;
+            top = rowsOnly ? Math.ceil(need / stride) * stride : need + 8;
+        }
         if (top !== box.scrollTop) box.scrollTo({ top, behavior: 'smooth' });
+    }
+
+    // Phones: stack each screen's panel over its list, fitted to the visible width, with the list scrolling above the legend.
+    function fitScreen() {
+        const body = screenEl.querySelector('.body');
+        const parts = [...body.children];
+        const scroller = body.querySelector('.scroller');
+        body.style.width = '';
+        parts.forEach((el) => {
+            el.style.transform = '';
+            el.style.left = '';
+            el.style.top = '';
+            el.style.width = '';
+            el.style.maxHeight = '';
+        });
+        if (scroller) scroller.style.height = '';
+        if (!view.portrait) return;
+        const width = view.r - view.m - 24;
+        const room = view.b - 104 - body.offsetTop;
+        body.style.width = `${width}px`;
+        let y = 0;
+        parts.forEach((el) => {
+            if (el.classList.contains('panel')) {
+                const k = Math.min(1, width / el.offsetWidth, (room * 0.52) / el.offsetHeight);
+                el.style.transform = `scale(${k})`;
+                y += el.offsetHeight * k + 20;
+            } else if (el.classList.contains('list')) {
+                el.style.left = '0px';
+                el.style.top = `${y}px`;
+                el.style.width = `${width}px`;
+                el.style.maxHeight = `${Math.max(120, room - y)}px`;
+                if (scroller) scroller.style.height = `${Math.max(110, room - y - scroller.offsetTop)}px`;
+            }
+        });
+        const cur = state.items[state.sel];
+        if (cur) keepVisible(cur.el.parentElement, cur.el);
     }
 
     function renderAchievements(body) {
@@ -1295,10 +1338,7 @@
             const have = !!achStore[a.id];
             const entry = item(scroller, a.secret && !have ? 'Secret Achievement' : a.name, () => {}, `${a.g}G`, have ? 'trophy' : 'lock');
             if (!have) entry.el.classList.add('locked');
-            entry.focus = () => {
-                show(a);
-                keepVisible(scroller, entry.el);
-            };
+            entry.focus = () => show(a);
             return entry;
         });
     }
@@ -1353,7 +1393,10 @@
     function highlight() {
         state.items.forEach((it, i) => it.el.classList.toggle('sel', i === state.sel));
         const cur = state.items[state.sel];
-        if (cur && cur.focus) cur.focus();
+        if (!cur) return;
+        if (cur.focus) cur.focus();
+        const box = cur.el.parentElement;
+        if (box.scrollHeight > box.clientHeight + 1) keepVisible(box, cur.el);
     }
 
     function renderScreen() {
@@ -1364,6 +1407,7 @@
         body.replaceChildren();
         state.items = def.render(body);
         state.sel = Math.min(state.sel, Math.max(0, state.items.length - 1));
+        fitScreen();
         highlight();
         renderLegend();
     }
@@ -1373,6 +1417,12 @@
     let musicHeld = false;
 
     function openScreen(key) {
+        // a history entry per open screen, so a phone's back gesture closes it instead of leaving the site
+        if (!state.screen) {
+            try {
+                history.pushState({ mzScreen: true }, '');
+            } catch { /* history unavailable */ }
+        }
         if (VIDEO_SCREENS.has(key) && !song.paused) {
             song.pause();
             musicHeld = true;
@@ -1394,7 +1444,8 @@
         if (state.screen) renderScreen();
     }
 
-    function closeScreen() {
+    function closeScreen(fromHistory) {
+        if (!fromHistory && history.state && history.state.mzScreen) history.back();
         clearTimeout(tunedTimer);
         gbxStop();
         gbx.items = null;
@@ -1423,6 +1474,12 @@
         sfx.move();
         highlight();
     }
+
+    addEventListener('popstate', () => {
+        if (!state.screen) return;
+        sfx.back();
+        closeScreen(true);
+    });
 
     // ── input ──────────────────────────────────────────────
     function input(action, src) {
@@ -1569,8 +1626,11 @@
     let needsDraw = true;
     const cam = { x: 0, y: 0, tx: 0, ty: 0 };
 
+    // The visible part of the 1280x720 stage. Phones show its left side at full height and stack screens.
+    const view = { portrait: false, r: 1280, b: 720, m: 96 };
+
     function resize() {
-        W = innerWidth;
+        W = document.documentElement.clientWidth || innerWidth;
         H = innerHeight;
         DPR = Math.min(devicePixelRatio || 1, 1.5);
         canvas.width = Math.round(W * DPR);
@@ -1580,8 +1640,13 @@
         OX = portrait ? 0 : (W - 1280 * S) / 2;
         OY = (H - 720 * S) / 2;
         stage.style.transform = `translate(${OX}px, ${OY}px) scale(${S})`;
-        stage.style.setProperty('--view-r', `${Math.min(1280, (W - OX) / S)}px`);
+        Object.assign(view, { portrait, r: Math.min(1280, (W - OX) / S), b: portrait ? (H - OY) / S : 720, m: portrait ? 40 : 96 });
+        stage.style.setProperty('--view-r', `${view.r}px`);
+        stage.style.setProperty('--view-b', `${view.b}px`);
+        stage.style.setProperty('--m', `${view.m}px`);
         stage.style.setProperty('--edge', portrait ? '24px' : '72px');
+        document.body.classList.toggle('portrait', portrait);
+        if (state.screen) fitScreen();
         paintStatic();
         needsDraw = true;
     }
@@ -1767,7 +1832,7 @@
 
     function intro() {
         chEls.forEach((el, i) => el.animate([{ opacity: 0 }, { opacity: el.style.opacity }], { duration: 600, delay: 100 + i * 60, fill: 'backwards' }));
-        if (settings.motion) layoutRow(true);
+        layoutRow(true);
     }
 
     // ── boot ───────────────────────────────────────────────
@@ -1798,10 +1863,6 @@
         sfx.boot();
         startMusic();
         wakeAvatar();
-        if (!settings.motion) {
-            endBoot();
-            return;
-        }
         bootEl.classList.add('play');
         bootTimer = setTimeout(endBoot, 3200);
     }

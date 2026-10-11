@@ -6,7 +6,9 @@ hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are serve
 
 - content (profile, gamerscore, socials and follower counts, games, channels): top of `app.js`
 - channels: friends (geobox, plus messages once `CONTACT.email` is set), socials (youtube, twitch, tiktok, x, discord), my xbox (disc, gamer profile, game library, my setup once `SETUP` has items, system settings)
-- controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions
+- controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions. the phone/browser back gesture closes an open screen
+- phones: portrait shows the left of the dashboard at full height; screens stack their panel over the menu (menus scroll) and pop-ups stay in view. the WebGL avatar is never fully hidden (opacity .001) because rebuilding its layer stalled phones long enough to swallow the slide animations
+- reduced motion: only the background drift and pulsing glows stop; navigation transitions stay
 - boot screen: plays every time the page opens (press any button, then the startup swirl and chime; pressing again skips it)
 - socials: youtube and twitch open in-dashboard preview screens (latest uploads / live stream); the youtube screen uses the channel's videos-only playlist (`UULF…`, no shorts or streams) set in `SOCIALS` in `app.js`
 - avatar: a 60fps idle loop recorded from the [360sona](https://360sona.com) avatar. `assets/avatar.mp4` (webm fallback) holds colour on the left half and transparency on the right, recombined in the browser with webgl; `assets/avatar.webp` is its first frame and shows instantly
