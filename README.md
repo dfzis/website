@@ -5,7 +5,7 @@ mewzah's personal site: an xbox 360 nxe-style dashboard. plain html/css/js, no b
 hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are served as-is). © mewzah, all rights reserved.
 
 - content (profile, gamerscore, socials and follower counts, games, channels): top of `app.js`
-- channels: friends (geobox), socials (youtube, twitch, tiktok, x, discord), my xbox (disc, gamer profile, game library, system settings)
+- channels: friends (geobox, plus messages once `CONTACT.email` is set), socials (youtube, twitch, tiktok, x, discord), my xbox (disc, gamer profile, game library, my setup once `SETUP` has items, system settings)
 - controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions
 - boot screen: plays every time the page opens (press any button, then the startup swirl and chime; pressing again skips it)
 - socials: youtube and twitch open in-dashboard preview screens (latest uploads / live stream); the youtube screen uses the channel's videos-only playlist (`UULF…`, no shorts or streams) set in `SOCIALS` in `app.js`
@@ -13,7 +13,10 @@ hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are serve
 - images: `assets/gamerpic.png` (gamer picture); per game in `GAMES`: tile art (`assets/cod4.jpg`, `mw2.jpg`, `halo3.jpg`) and disc photos cut out to circles centred on the hub (`assets/disc-*.webp`)
 - game library: visitors pick a game (shown as a spinning disc) to put it in the tray; the disc tile on my xbox switches to it and the choice is remembered in their browser. each game in `GAMES` has tile `art` and an optional cut-out `disc` image (a printed disc is drawn without one)
 - geobox (sponsor): the friends channel's partner tile, opening a playable mock of geobox's search panel; `GEOBOX.code` in `app.js` is the creator code shown with a copy button (`null` hides it); logo in `assets/geobox.webp`
-- live status: every 2 minutes the page asks decapi.me (free, no key) whether the twitch channel is live; when it is, the twitch tile shows LIVE, the gamercard says what's being streamed and a pop-up announces it
+- live status: every 2 minutes the page asks decapi.me (free, no key) whether the twitch channel is live; when it is, the twitch tile shows LIVE with the viewer count, the twitch screen shows the stream title, the gamercard says what's being streamed and a pop-up announces it
+- stats: `.github/workflows/stats.yml` runs `scripts/update-stats.mjs` every 3 hours to refresh `data/stats.json` (youtube subscriber count and latest upload) and commits it to the branch pages serves. scheduled workflows only run from the repo's default branch. twitch, x and tiktok counts are set by hand in `SOCIALS`
+- achievements: 13 achievements worth 200G (like an arcade game), unlocked by exploring the site and saved in each visitor's browser. they pop up with a recreation of the 360 toast (orb pops in, bar unrolls, "Achievement unlocked / 10G - Name") and are listed under gamer profile → achievements. the chime is synthesized; drop a real file in `assets/sfx/` and set `SFX_FILES.achievement` to use it
+- visitor stats: set `ANALYTICS.goatcounter` to your goatcounter code to count visits and which screens people open
 - music: `assets/song.mp3` starts on the first key press or tap and loops; visitors can turn it off in system settings
 - font: uses convection (the real 360 dashboard font) when it's installed on the visitor's computer, otherwise the free barlow, self-hosted in `assets/fonts` under the SIL open font license
 - sound effects are synthesized; to use real files, put them in `assets/sfx/` and list them in `SFX_FILES` in `app.js`

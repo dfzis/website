@@ -10,7 +10,7 @@
 
     // count: a number shows "12.5K followers"; null shows the handle instead.
     const SOCIALS = {
-        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: 32000, unit: 'subscribers', uploads: 'UULFEPXFafBx8AEAU7EnARmSnw' },
+        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: 32400, unit: 'subscribers', uploads: 'UULFEPXFafBx8AEAU7EnARmSnw' },
         twitch: { name: 'Twitch', handle: 'mewzah', href: 'https://www.twitch.tv/mewzah', count: 4400, unit: 'followers' },
         tiktok: { name: 'TikTok', handle: 'new account', href: 'https://www.tiktok.com/@mewzah', count: null, unit: 'followers' },
         x: { name: 'X', handle: '@mewzah1', href: 'https://x.com/mewzah1', count: 1600, unit: 'followers' },
@@ -33,6 +33,35 @@
         modes: ['Resurgence Quads', 'Resurgence Duos', 'Battle Royale Quads', 'Resurgence Casuals', 'Black Ops Royale'],
     };
 
+    // Business contact on a Messages tile in Friends (null hides the tile).
+    const CONTACT = { email: null };
+
+    // My Setup screen in My Xbox, e.g. { label: 'Controller', item: 'SCUF Reflex Pro', href: 'https://…' } (empty hides the tile).
+    const SETUP = [];
+
+    // Visitor stats with GoatCounter: the name before .goatcounter.com (null turns it off).
+    const ANALYTICS = { goatcounter: null };
+
+    // YouTube subscribers and latest upload, refreshed every few hours by .github/workflows/stats.yml.
+    const STATS_URL = 'data/stats.json';
+
+    // Achievements are earned per visitor and saved in their browser. 200G in total, like an Arcade game.
+    const ACHIEVEMENTS = [
+        { id: 'boot', name: 'Welcome Home', desc: "Boot up mewzah's dashboard.", g: 10, icon: 'home' },
+        { id: 'profile', name: 'Gamer Card', desc: "View mewzah's gamer profile.", g: 10, icon: 'card' },
+        { id: 'surfer', name: 'Channel Surfer', desc: 'Visit every channel.', g: 15, icon: 'channels' },
+        { id: 'tuned', name: 'Tuned In', desc: "Watch mewzah's latest YouTube upload.", g: 15, icon: 'youtube' },
+        { id: 'front', name: 'Front Row', desc: 'Open the Twitch screen while mewzah is live.', g: 25, icon: 'twitch' },
+        { id: 'social', name: 'Social Butterfly', desc: "Visit three of mewzah's socials.", g: 15, icon: 'people' },
+        { id: 'eject', name: 'Tray Open', desc: 'Eject the disc.', g: 5, icon: 'eject' },
+        { id: 'library', name: 'Disc Jockey', desc: 'Play every game in the Game Library.', g: 20, icon: 'disc' },
+        { id: 'lobby', name: 'Lobby Found', desc: 'Find a lobby with Geobox.', g: 15, icon: 'geobox' },
+        { id: 'code', name: 'Supporter', desc: "Copy mewzah's Geobox creator code.", g: 25, icon: 'ticket' },
+        { id: 'settings', name: 'Fine Tuning', desc: 'Change a system setting.', g: 5, icon: 'gear' },
+        { id: 'konami', name: 'Old School', desc: 'Enter the Konami code.', g: 30, icon: 'controller', secret: true },
+        { id: 'night', name: 'Night Owl', desc: 'Visit between midnight and 5am.', g: 10, icon: 'moon', secret: true },
+    ];
+
     // Free Twitch status service (no API key). Uptime replies with a duration when live, '<name> is offline' otherwise.
     const TWITCH_STATUS = 'https://decapi.me/twitch';
     const LIVE_POLL_MS = 120000;
@@ -47,6 +76,18 @@
         discord: 'M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z',
         x: 'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z',
         controller: 'M6.6 5.5h10.8c2.6 0 4.3 1.9 4.8 4.5l1.1 5.9c.4 2.3-1.1 4.1-3.1 4.1-1.3 0-2.3-.7-3-1.9L16 15.7H8l-1.2 2.4c-.7 1.2-1.7 1.9-3 1.9-2 0-3.5-1.8-3.1-4.1L1.8 10c.5-2.6 2.2-4.5 4.8-4.5zM6 8.6v1.9H4.1v1.8H6v1.9h1.8v-1.9h1.9v-1.8H7.8V8.6zm11.1-.1a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm-2.2 2.2a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm4.4 0a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1zm-2.2 2.2a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1z',
+        home: 'M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z',
+        card: 'M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm5 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 17h7c0-2.2-1.6-3.3-3.5-3.3S4.5 14.8 4.5 17zM13 9v1.6h6.5V9zm0 3.2v1.6h5v-1.6z',
+        channels: 'M3 4h18v12H3zm2 2v8h14V6zM8 18.4h8V20H8z',
+        people: 'M8.8 4a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm7.6 1.6a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM2 19c0-3.3 3-5.5 6.8-5.5s6.7 2.2 6.7 5.5v1H2zm14.6-5.2c3 .2 5.4 2 5.4 4.7V20h-4.6v-1c0-2-.3-3.6-.8-5.2z',
+        eject: 'M12 4 4 13h16zM4 16h16v3H4z',
+        disc: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
+        ticket: 'M3 6h18v4.2a1.8 1.8 0 0 0 0 3.6V18H3v-4.2a1.8 1.8 0 0 0 0-3.6zm6.2 1.6v8.8h1.6V7.6z',
+        moon: 'M14.5 2.5A9.5 9.5 0 1 0 21.5 17 7.6 7.6 0 0 1 14.5 2.5z',
+        lock: 'M7 10V7.5a5 5 0 0 1 10 0V10h1.5v11h-13V10zm2.2 0h5.6V7.5a2.8 2.8 0 0 0-5.6 0z',
+        trophy: 'M7 3h10v2h3.5v2.5A4.5 4.5 0 0 1 16.4 12a5 5 0 0 1-3.4 2.8V17h3v3H8v-3h3v-2.2A5 5 0 0 1 7.6 12a4.5 4.5 0 0 1-4.1-4.5V5H7zM5.4 7v.5c0 1.2.8 2.2 1.9 2.5A9 9 0 0 1 7 7zm11.3 0a9 9 0 0 1-.3 3c1.1-.3 1.9-1.3 1.9-2.5V7z',
+        mail: 'M2 5h20v14H2zm2.2 2.2v.4l7.8 5.3 7.8-5.3v-.4zm0 2.9v6.7h15.6v-6.7L12 15.4z',
+        monitor: 'M2 4h20v13H2zm2 2v9h16V6zm6.5 11h3v2.2H16V21H8v-1.8h2.5z',
         gear: 'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
     };
 
@@ -70,7 +111,10 @@
     const CHANNELS = [
         {
             name: 'Friends',
-            tiles: [{ kind: 'geobox', label: 'Geobox', screen: 'geobox' }],
+            tiles: [
+                { kind: 'geobox', label: 'Geobox', screen: 'geobox' },
+                ...(CONTACT.email ? [{ label: 'Messages', icon: 'mail', screen: 'messages' }] : []),
+            ],
         },
         {
             name: 'Socials',
@@ -88,6 +132,7 @@
                 discTile,
                 { kind: 'gamercard', label: 'Gamer Profile', screen: 'profile' },
                 { label: 'Game Library', icon: 'controller', screen: 'library' },
+                ...(SETUP.length ? [{ label: 'My Setup', icon: 'monitor', screen: 'setup' }] : []),
                 { label: 'System Settings', icon: 'gear', screen: 'settings' },
             ],
         },
@@ -113,8 +158,9 @@
     const legendEl = $('#legend');
 
     const n = CHANNELS.length;
-    let booting = false;
-    const live = { on: false, game: '', announced: false };
+    let booting = true; // until the boot screen is dismissed
+    const live = { on: false, game: '', title: '', viewers: 0, announced: false };
+    const liveBadge = () => (live.on && live.viewers ? `LIVE · ${compact.format(live.viewers)}` : 'LIVE');
     const presence = () => (live.on ? (live.game ? `Streaming ${live.game}` : 'Live on Twitch') : 'Online');
     const state = {
         ch: n - 1,
@@ -270,6 +316,12 @@
                 [220, 329.63, 440, 554.37, 659.25].forEach((f, i) => tone(f, t + 1.15 + i * 0.03, 2.6, { gain: 0.032, attack: 0.12 }));
                 [1760, 2217.46, 2637.02, 3520].forEach((f, i) => tone(f, t + 1.25 + i * 0.09, 0.9, { gain: 0.016, type: 'triangle' }));
             }),
+            achievement: () => play('achievement', (t) => {
+                tone(330, t, 0.17, { gain: 0.075, to: 495 });
+                tone(660, t, 0.13, { gain: 0.03, type: 'triangle', to: 990 });
+                [1567.98, 2093, 2637.02].forEach((f, i) => tone(f, t + 0.1 + i * 0.014, 1.15 - i * 0.28, { gain: 0.05 / (i + 1) }));
+                noise(t + 0.08, 0.35, { gain: 0.02, f0: 4000, f1: 9000, q: 0.7 });
+            }),
             eject: () => play('eject', (t) => {
                 tone(2200, t, 0.03, { gain: 0.04, type: 'square' });
                 noise(t + 0.03, 0.55, { gain: 0.09, f0: 260, f1: 900, q: 2.5 });
@@ -301,7 +353,14 @@
     }
 
     let toastTimer;
+    let toastUntil = 0;
+    const heldToasts = [];
     function toast(msg, quiet) {
+        if (achBusy) {
+            heldToasts.push([msg, quiet]);
+            return;
+        }
+        toastUntil = performance.now() + 2600;
         toastEl.querySelector('span').textContent = msg;
         toastEl.classList.add('show');
         if (!quiet) sfx.notify();
@@ -309,9 +368,10 @@
         toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
     }
 
-    function copyText(text) {
-        const done = () => toast(`Discord username copied: ${text}`);
-        const fail = () => toast(`Discord: ${text}`);
+    function copyText(text, what = 'Discord username') {
+        if (what === 'Discord username') sawSocial('discord');
+        const done = () => toast(`${what} copied: ${text}`);
+        const fail = () => toast(`${what}: ${text}`);
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(done, fail);
         } else {
@@ -320,6 +380,9 @@
     }
 
     function openLink(href, src) {
+        const key = Object.keys(SOCIALS).find((k) => SOCIALS[k].href && href.startsWith(SOCIALS[k].href));
+        if (key) sawSocial(key);
+        track(`link/${key || href}`);
         if (src === 'pad') location.href = href;
         else window.open(href, '_blank', 'noopener');
     }
@@ -339,7 +402,171 @@
         if (avatarVideo && avatarVideo.paused) avatarVideo.play().catch(() => {});
     }
 
+    // ── visitor stats ──────────────────────────────────────
+    function track(path, title) {
+        if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path, title: title || path, event: true });
+    }
+    if (ANALYTICS.goatcounter) {
+        const gc = make('script');
+        gc.async = true;
+        gc.src = 'https://gc.zgo.at/count.js';
+        gc.dataset.goatcounter = `https://${ANALYTICS.goatcounter}.goatcounter.com/count`;
+        document.head.append(gc);
+    }
+
+    // ── achievements ───────────────────────────────────────
+    const ACH_TOTAL = ACHIEVEMENTS.reduce((t, a) => t + a.g, 0);
+    const readJSON = (key, fallback) => {
+        try {
+            return JSON.parse(localStorage.getItem(key)) || fallback;
+        } catch {
+            return fallback;
+        }
+    };
+    const saveJSON = (key, value) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch { /* storage unavailable */ }
+    };
+    const achStore = readJSON('mz.ach', {});
+    const earnedG = () => ACHIEVEMENTS.reduce((t, a) => t + (achStore[a.id] ? a.g : 0), 0);
+    const achQueue = [];
+    let achBusy = false;
+    let tunedTimer = 0;
+    const KONAMI = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
+    const konami = [];
+    const socialsSeen = new Set();
+    const played = new Set(readJSON('mz.played', []));
+
+    function unlock(id) {
+        const a = ACHIEVEMENTS.find((x) => x.id === id);
+        if (!a || achStore[id]) return;
+        achStore[id] = Date.now();
+        saveJSON('mz.ach', achStore);
+        track(`achievement/${id}`, a.name);
+        achQueue.push(a);
+        showAchievement();
+        if (state.screen === 'achievements' || state.screen === 'profile') refreshScreen();
+    }
+
+    function sawSocial(key) {
+        socialsSeen.add(key);
+        if (socialsSeen.size >= 3) unlock('social');
+    }
+
+    function markPlayed(g) {
+        played.add(g.id);
+        saveJSON('mz.played', [...played]);
+        if (GAMES.every((x) => played.has(x.id))) unlock('library');
+    }
+
+    // The 360 toast: the orb pops in, the bar unrolls to the right, holds, then rolls back into the orb.
+    const ringSeg = (a0, a1, lit) => {
+        const pt = (r, a) => `${(50 + r * Math.cos(a * Math.PI / 180)).toFixed(2)} ${(50 + r * Math.sin(a * Math.PI / 180)).toFixed(2)}`;
+        return `<path fill="url(#ach-${lit ? 'lit' : 'seg'})" d="M${pt(45.5, a0)}A45.5 45.5 0 0 1 ${pt(45.5, a1)}L${pt(37.5, a1)}A37.5 37.5 0 0 0 ${pt(37.5, a0)}Z"/>`;
+    };
+    const ACH_ORB = '<svg viewBox="0 0 100 100" aria-hidden="true"><defs>' +
+        '<radialGradient id="ach-sphere" cx="38%" cy="30%" r="78%"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#e4e4e4"/><stop offset=".62" stop-color="#9c9c9c"/><stop offset="1" stop-color="#3a3a3a"/></radialGradient>' +
+        '<linearGradient id="ach-x" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9ff7c"/><stop offset=".5" stop-color="#83d325"/><stop offset="1" stop-color="#3d8c0b"/></linearGradient>' +
+        '<linearGradient id="ach-seg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9a9a9"/><stop offset="1" stop-color="#6a6a6a"/></linearGradient>' +
+        '<linearGradient id="ach-lit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d2ff70"/><stop offset="1" stop-color="#6cc21c"/></linearGradient>' +
+        '<radialGradient id="ach-glow"><stop offset="0" stop-color="#f4ffa8" stop-opacity=".85"/><stop offset="1" stop-color="#d8ff70" stop-opacity="0"/></radialGradient>' +
+        '<clipPath id="ach-clip"><circle cx="50" cy="50" r="33.5"/></clipPath></defs>' +
+        '<circle cx="50" cy="50" r="49" fill="#141414"/>' +
+        ringSeg(187, 263, true) + ringSeg(277, 353) + ringSeg(7, 83) + ringSeg(97, 173) +
+        '<circle cx="50" cy="50" r="35.5" fill="#0e0e0e"/><circle cx="50" cy="50" r="33.5" fill="url(#ach-sphere)"/>' +
+        // the X: two blades, wide where they meet the sphere's edge and pinched where they cross
+        '<g clip-path="url(#ach-clip)" fill="url(#ach-x)">' +
+        '<path d="M16 29Q35 35 47 50Q58 64 63 88L77 81Q67 60 53 50Q40 39 29 15Z"/>' +
+        '<path d="M84 29Q65 35 53 50Q42 64 37 88L23 81Q33 60 47 50Q60 39 71 15Z"/>' +
+        '<circle cx="50" cy="50" r="10" fill="url(#ach-glow)"/></g>' +
+        '<ellipse cx="40" cy="32" rx="14" ry="8.5" fill="#fff" opacity=".3"/></svg>';
+
+    const achEl = make('div', 'ach');
+    achEl.setAttribute('role', 'status');
+    achEl.innerHTML = `<div class="ach-bar"><div class="ach-text"><p></p><p></p></div></div><div class="ach-orb">${ACH_ORB}</div>`;
+    stage.append(achEl);
+    achEl.addEventListener('click', () => {
+        if (!booting && !state.screen) openScreen('achievements');
+    });
+
+    function showAchievement() {
+        if (achBusy || booting || !achQueue.length) return;
+        const wait = toastUntil - performance.now();
+        if (wait > 0) {
+            setTimeout(showAchievement, wait + 200);
+            return;
+        }
+        achBusy = true;
+        const a = achQueue.shift();
+        const bar = achEl.querySelector('.ach-bar');
+        const orb = achEl.querySelector('.ach-orb');
+        const text = achEl.querySelector('.ach-text');
+        const [l1, l2] = text.querySelectorAll('p');
+        l1.textContent = 'Achievement unlocked';
+        l2.textContent = `${a.g}G - ${a.name}`;
+        const H = 70;
+        const W = Math.ceil(text.offsetLeft + text.offsetWidth + 30);
+        achEl.style.width = `${W}px`;
+        achEl.classList.add('show');
+        sfx.achievement();
+        const out = 'cubic-bezier(.2,.8,.2,1)';
+        const anims = [
+            orb.animate([
+                { transform: 'scale(.2)', opacity: 0 },
+                { transform: 'scale(1.1)', opacity: 1, offset: 0.7 },
+                { transform: 'scale(1)', opacity: 1 },
+            ], { duration: 260, easing: 'ease-out', fill: 'forwards' }),
+            bar.animate([
+                { width: `${H}px`, transform: 'scale(.2)', opacity: 0, easing: 'ease-out' },
+                { width: `${H}px`, transform: 'scale(1)', opacity: 1, offset: 0.3, easing: out },
+                { width: `${W}px`, transform: 'scale(1)', opacity: 1 },
+            ], { duration: 640, fill: 'forwards' }),
+            text.animate([{ opacity: 0 }, { opacity: 0, offset: 0.4 }, { opacity: 1 }], { duration: 640, fill: 'forwards' }),
+        ];
+        setTimeout(() => {
+            const ease = 'cubic-bezier(.6,0,.8,.4)';
+            const close = [
+                text.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards' }),
+                bar.animate([
+                    { width: `${W}px`, transform: 'scale(1)', opacity: 1, easing: ease },
+                    { width: `${H}px`, transform: 'scale(1)', opacity: 1, offset: 0.62, easing: 'ease-in' },
+                    { width: `${H}px`, transform: 'scale(.2)', opacity: 0 },
+                ], { duration: 520, fill: 'forwards' }),
+                orb.animate([
+                    { transform: 'scale(1)', opacity: 1 },
+                    { transform: 'scale(1)', opacity: 1, offset: 0.62 },
+                    { transform: 'scale(.2)', opacity: 0 },
+                ], { duration: 520, easing: 'ease-in', fill: 'forwards' }),
+            ];
+            close[1].finished.then(() => {
+                achEl.classList.remove('show');
+                [...anims, ...close].forEach((an) => an.cancel());
+                achBusy = false;
+                const held = heldToasts.pop();
+                heldToasts.length = 0;
+                if (held) toast(...held);
+                setTimeout(showAchievement, 350);
+            });
+        }, 4800);
+    }
+
+    markPlayed(game);
+
+    // ── live numbers from data/stats.json ──────────────────
+    let latest = null;
+
+    function applyStats(d) {
+        const yt = d && d.youtube;
+        if (!yt) return;
+        if (Number.isFinite(yt.subscribers)) SOCIALS.youtube.count = yt.subscribers;
+        if (yt.latest && yt.latest.id) latest = yt.latest;
+        document.querySelectorAll('[data-count="youtube"]').forEach((el) => { el.textContent = compact.format(SOCIALS.youtube.count); });
+    }
+    fetch(STATS_URL, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then(applyStats, () => {});
+
     function eject() {
+        unlock('eject');
         sfx.eject();
         toast('Disc tray open', true);
     }
@@ -468,7 +695,11 @@
             ['youtube', 'twitch', 'tiktok', 'x'].forEach((key) => {
                 const s = make('span', 't-soc');
                 s.innerHTML = icon(key, '');
-                if (SOCIALS[key].count != null) s.append(make('i', '', compact.format(SOCIALS[key].count)));
+                if (SOCIALS[key].count != null) {
+                    const c = make('i', '', compact.format(SOCIALS[key].count));
+                    c.dataset.count = key;
+                    s.append(c);
+                }
                 socials.append(s);
             });
             const loc = make('span', 't-loc', PROFILE.location);
@@ -488,9 +719,10 @@
             el.style.setProperty('--art', `url("${game.art}")`);
             el.append(make('span', 't-label t-wrap', t.label), make('span', 'disc-badge'));
         } else {
+            el.dataset.tile = t.icon;
             el.insertAdjacentHTML('beforeend', glyph(t.icon));
             el.append(make('span', 't-label', t.label));
-            if (t.icon === 'twitch') el.append(make('span', 'live-badge', 'LIVE'));
+            if (t.icon === 'twitch') el.append(make('span', 'live-badge', liveBadge()));
         }
         return el;
     }
@@ -655,9 +887,12 @@
         layoutRow();
     }
 
+    const visited = new Set();
     function gotoChannel(i, dir, steps = 1) {
         if (state.screen || i === state.ch) return;
         state.ch = i;
+        visited.add(i);
+        if (visited.size === n) unlock('surfer');
         state.chSteps += dir * steps;
         cam.ty = state.chSteps * 70;
         sfx.channel(dir);
@@ -724,6 +959,9 @@
         twitch: { title: 'Twitch', render: renderTwitch },
         game: { title: 'Game Details', render: renderGame },
         library: { title: 'Game Library', render: renderLibrary },
+        achievements: { title: 'Achievements', render: renderAchievements },
+        messages: { title: 'Messages', render: renderMessages },
+        setup: { title: 'My Setup', render: renderSetup },
         geobox: { title: 'Geobox', render: renderGeobox },
         settings: { title: 'System Settings', render: renderSettings },
     };
@@ -762,10 +1000,11 @@
         card.append(pic, info);
 
         const list = make('div', 'list compact');
+        const ach = item(list, 'Achievements', () => openScreen('achievements'), `${earnedG()} / ${ACH_TOTAL}G`, 'trophy');
         list.append(make('p', 'list-head', 'Social Stats'));
         body.append(card, list);
-        return Object.entries(SOCIALS).map(([key, s]) =>
-            item(list, s.name, (src) => (s.href ? openLink(s.href, src) : copyText(s.copy)), statText(s), key));
+        return [ach, ...Object.entries(SOCIALS).map(([key, s]) =>
+            item(list, s.name, (src) => (s.href ? openLink(s.href, src) : copyText(s.copy)), statText(s), key))];
     }
 
     function renderEmbed(body, src, label) {
@@ -785,6 +1024,7 @@
         renderEmbed(body, `https://www.youtube-nocookie.com/embed/videoseries?list=${s.uploads}&autoplay=1&rel=0&playsinline=1`, `${s.name}: latest uploads`);
         const list = make('div', 'list compact');
         list.append(make('p', 'list-head', statText(s)));
+        if (latest) list.append(make('p', 'list-sub', `Latest: ${latest.title}`));
         body.append(list);
         return [
             item(list, 'Open Channel', (src) => openLink(s.href, src), undefined, 'youtube'),
@@ -796,8 +1036,9 @@
         const s = SOCIALS.twitch;
         renderEmbed(body, `https://player.twitch.tv/?channel=${encodeURIComponent(s.handle)}&parent=${location.hostname}&autoplay=true&muted=false`, `${s.name}: ${s.handle}`);
         const list = make('div', 'list compact');
-        list.append(make('p', 'list-head', live.on ? `Live now · ${statText(s)}` : statText(s)));
+        list.append(make('p', 'list-head', twitchHead()), make('p', 'list-sub'));
         body.append(list);
+        requestAnimationFrame(paintTwitchHead);
         return [item(list, 'Open on Twitch', (src) => openLink(s.href, src), undefined, 'twitch')];
     }
 
@@ -864,6 +1105,7 @@
         }, 1700));
         gbx.timers.push(setTimeout(() => {
             gbxStatus(`Lobby found${map} · party code sent`, 'done');
+            unlock('lobby');
             toast(`Geobox: lobby found in ${regionName()}`);
         }, 2800));
     }
@@ -895,6 +1137,7 @@
         const items = [search, region, mode];
         if (GEOBOX.code) {
             items.push(item(list, `Copy code ${GEOBOX.code}`, () => {
+                unlock('code');
                 const done = () => toast(`Geobox code ${GEOBOX.code} copied`);
                 if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(GEOBOX.code).then(done, done);
                 else done();
@@ -977,6 +1220,7 @@
         try {
             localStorage.setItem('mz.game', g.id);
         } catch { /* storage unavailable */ }
+        markPlayed(g);
         discTile.label = `Play ${g.short}`;
         setTimeout(() => {
             closeScreen();
@@ -997,11 +1241,92 @@
         if (row.ci === DISC_CH && d) moveTile(d);
     }
 
+    function achIcon(a, got, cls) {
+        const el = make('div', `ach-icon ${cls}`);
+        if (!got) {
+            el.classList.add('locked');
+            el.innerHTML = glyph('lock');
+        } else if (a.icon === 'geobox') {
+            el.classList.add('ach-geobox');
+        } else {
+            el.innerHTML = glyph(a.icon);
+        }
+        return el;
+    }
+
+    // Scrolls a list by whole rows so the selected row is fully in view.
+    function keepVisible(box, el) {
+        const stride = el.offsetHeight + 6;
+        let top = box.scrollTop;
+        if (el.offsetTop < top) top = el.offsetTop;
+        else if (el.offsetTop + el.offsetHeight > top + box.clientHeight) top = Math.ceil((el.offsetTop + el.offsetHeight - box.clientHeight) / stride) * stride;
+        if (top !== box.scrollTop) box.scrollTo({ top, behavior: 'smooth' });
+    }
+
+    function renderAchievements(body) {
+        const panel = make('div', 'panel player ach-detail');
+        const info = make('div', 'pl-info');
+        const wrap = make('div', 'list compact');
+        const got = ACHIEVEMENTS.filter((a) => achStore[a.id]).length;
+        const scroller = make('div', 'scroller');
+        wrap.append(make('p', 'list-head', `${earnedG()} of ${ACH_TOTAL}G · ${got} of ${ACHIEVEMENTS.length} unlocked`), scroller);
+        body.append(panel, wrap);
+        const show = (a) => {
+            const have = !!achStore[a.id];
+            const hidden = a.secret && !have;
+            const score = make('p', 'pl-sub ach-score');
+            score.innerHTML = `<span>${a.g}</span>${GCOIN}`;
+            info.replaceChildren(
+                make('p', 'pl-title wrap', hidden ? 'Secret Achievement' : a.name),
+                score,
+                make('p', 'ach-desc', hidden ? 'Continue playing to unlock this secret achievement.' : a.desc),
+                make('p', 'ach-when', have ? `Unlocked ${new Date(achStore[a.id]).toLocaleDateString()}` : 'Locked'),
+            );
+            panel.replaceChildren(achIcon(a, have, 'big'), info);
+        };
+        return ACHIEVEMENTS.map((a) => {
+            const have = !!achStore[a.id];
+            const entry = item(scroller, a.secret && !have ? 'Secret Achievement' : a.name, () => {}, `${a.g}G`, have ? 'trophy' : 'lock');
+            if (!have) entry.el.classList.add('locked');
+            entry.focus = () => {
+                show(a);
+                keepVisible(scroller, entry.el);
+            };
+            return entry;
+        });
+    }
+
+    function renderMessages(body) {
+        const panel = make('div', 'panel player');
+        const art = make('div', 'art');
+        art.innerHTML = glyph('mail');
+        const info = make('div', 'pl-info');
+        info.append(make('p', 'pl-title', 'Business'), make('p', 'pl-sub', CONTACT.email), make('p', 'ach-desc', 'Sponsorships, collaborations and other enquiries.'));
+        panel.append(art, info);
+        const list = make('div', 'list');
+        body.append(panel, list);
+        return [
+            item(list, 'Send Email', (src) => openLink(`mailto:${CONTACT.email}`, src), undefined, 'mail'),
+            item(list, 'Copy Email', () => copyText(CONTACT.email, 'Email')),
+        ];
+    }
+
+    function renderSetup(body) {
+        const list = make('div', 'list wide');
+        body.append(list);
+        return SETUP.map((g) => {
+            const entry = item(list, g.label, (src) => (g.href ? openLink(g.href, src) : sfx.bump()), g.item);
+            if (g.href) entry.el.classList.add('has-link');
+            return entry;
+        });
+    }
+
     function renderSettings(body) {
         const list = make('div', 'list wide');
         body.append(list);
         const toggle = (label, key) => {
             const entry = item(list, label, () => {
+                unlock('settings');
                 if (key === 'sound') {
                     toggleSound();
                     return;
@@ -1048,6 +1373,11 @@
         state.screen = key;
         state.sel = 0;
         renderScreen();
+        track(`screen/${key}`);
+        if (key === 'profile') unlock('profile');
+        if (key === 'youtube' || key === 'twitch') sawSocial(key);
+        if (key === 'twitch' && live.on) unlock('front');
+        if (key === 'youtube') tunedTimer = setTimeout(() => state.screen === 'youtube' && unlock('tuned'), 8000);
         stage.classList.add('in-screen');
         screenEl.setAttribute('aria-hidden', 'false');
         announce();
@@ -1058,6 +1388,7 @@
     }
 
     function closeScreen() {
+        clearTimeout(tunedTimer);
         gbxStop();
         gbx.items = null;
         // Hidden screens stay in the DOM for the fade-out; embedded players must go now or they keep playing.
@@ -1092,6 +1423,9 @@
             if (src !== 'wheel') bootPress();
             return;
         }
+        konami.push(action);
+        if (konami.length > KONAMI.length) konami.shift();
+        if (konami.join() === KONAMI.join()) unlock('konami');
         switch (action) {
             case 'left':
             case 'right': {
@@ -1125,7 +1459,7 @@
 
     const KEYS = {
         ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
-        Enter: 'a', ' ': 'a', Escape: 'b', Backspace: 'b', x: 'x', X: 'x', y: 'y', Y: 'y',
+        Enter: 'a', ' ': 'a', Escape: 'b', Backspace: 'b', a: 'a', A: 'a', b: 'b', B: 'b', x: 'x', X: 'x', y: 'y', Y: 'y',
     };
     let lastMove = 0;
     addEventListener('keydown', (e) => {
@@ -1474,6 +1808,11 @@
         setTimeout(() => el.remove(), 700);
         intro();
         if (live.on && !live.announced) announceLive();
+        setTimeout(() => {
+            unlock('boot');
+            if (new Date().getHours() < 5) unlock('night');
+            showAchievement();
+        }, 1100);
     }
 
     // ── live status ────────────────────────────────────────
@@ -1482,17 +1821,27 @@
         toast(`${PROFILE.tag} is ${live.game ? `streaming ${live.game}` : 'live on Twitch'}`);
     }
 
-    function setLive(on, game) {
-        if (on === live.on && game === live.game) return;
-        live.on = on;
-        live.game = game;
+    const twitchHead = () => (live.on ? `Live now${live.viewers ? ` · ${live.viewers.toLocaleString()} watching` : ''}` : statText(SOCIALS.twitch));
+    function paintTwitchHead() {
+        if (state.screen !== 'twitch') return;
+        screenEl.querySelector('.list-head').textContent = twitchHead();
+        screenEl.querySelector('.list-sub').textContent = live.on ? live.title : '';
+    }
+
+    function setLive(on, game, title = '', viewers = 0) {
+        if (on === live.on && game === live.game && title === live.title && viewers === live.viewers) return;
+        const wasOn = live.on;
+        Object.assign(live, { on, game, title, viewers });
         document.body.classList.toggle('is-live', on);
         document.querySelectorAll('.t-status, .gc-status .presence').forEach((el) => { el.textContent = presence(); });
-        const head = state.screen === 'twitch' && screenEl.querySelector('.list-head');
-        if (head) head.textContent = on ? `Live now · ${statText(SOCIALS.twitch)}` : statText(SOCIALS.twitch);
-        if (on && !live.announced && !booting) announceLive();
+        document.querySelectorAll('.live-badge').forEach((el) => { el.textContent = liveBadge(); });
+        paintTwitchHead();
+        if (on && state.screen === 'twitch') unlock('front');
+        if (on && !wasOn && !live.announced && !booting) announceLive();
         if (!on) live.announced = false;
     }
+
+    const cleanText = (t, max) => (t.length > max || /error|not found|offline|^$/i.test(t) ? '' : t);
 
     async function checkLive() {
         if (document.hidden) return;
@@ -1501,13 +1850,14 @@
             const res = await fetch(`${TWITCH_STATUS}/uptime/${user}`, { cache: 'no-store' });
             const text = (await res.text()).trim();
             const on = res.ok && !/offline/i.test(text) && /\d+\s+(second|minute|hour|day)/.test(text);
-            let game = '';
-            if (on) {
-                const g = await fetch(`${TWITCH_STATUS}/game/${user}`, { cache: 'no-store' });
-                game = g.ok ? (await g.text()).trim() : '';
-                if (game.length > 60 || /error|not found|offline/i.test(game)) game = '';
+            if (!on) {
+                setLive(false, '');
+                return;
             }
-            setLive(on, game);
+            const get = (what) => fetch(`${TWITCH_STATUS}/${what}/${user}`, { cache: 'no-store' })
+                .then((r) => (r.ok ? r.text() : ''), () => '').then((t) => t.trim());
+            const [game, title, viewers] = await Promise.all([get('game'), get('title'), get('viewercount')]);
+            setLive(true, cleanText(game, 60), cleanText(title, 140), parseInt(viewers, 10) || 0);
         } catch {
             // network hiccup: keep the last known state
         }

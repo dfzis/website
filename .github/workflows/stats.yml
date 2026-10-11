@@ -1,0 +1,41 @@
+# Keeps data/stats.json fresh (YouTube subscribers + latest upload) on the branch GitHub Pages serves.
+# Scheduled runs only fire from the repository's default branch.
+name: refresh stats
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+env:
+  SITE_BRANCH: claude/rebrand-y2k-theme-GkSiQ
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SITE_BRANCH }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/update-stats.mjs
+      - name: Commit and publish if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- data/stats.json && [ -z "$(git status --porcelain -- data/stats.json)" ]; then
+            echo "no change"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/stats.json
+          git commit -m "refresh stats"
+          git push origin "HEAD:${SITE_BRANCH}"
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" || true
