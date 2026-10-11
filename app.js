@@ -383,8 +383,15 @@
         const key = Object.keys(SOCIALS).find((k) => SOCIALS[k].href && href.startsWith(SOCIALS[k].href));
         if (key) sawSocial(key);
         track(`link/${key || href}`);
-        if (src === 'pad') location.href = href;
-        else window.open(href, '_blank', 'noopener');
+        if (href.startsWith('mailto:')) {
+            location.href = href; // hands off to the mail app; the dashboard stays put
+            return;
+        }
+        // Always a new tab so visitors never leave the dashboard. Controller presses don't count as a click
+        // to pop-up blockers, so if the browser refuses, explain instead of navigating away.
+        const w = window.open(href, '_blank');
+        if (w) w.opener = null;
+        else toast(src === 'pad' ? 'Pop-up blocked: allow pop-ups for mewzah.tv to open links with a controller' : 'Pop-up blocked: allow pop-ups for mewzah.tv');
     }
 
     // Browsers only allow audio after a user gesture, so the song starts on the first input.
