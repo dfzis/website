@@ -4,7 +4,7 @@ mewzah's personal site: an xbox 360 nxe-style dashboard. plain html/css/js, no b
 
 - content (profile, gamerscore, socials and follower counts, channels, song title): top of `app.js`
 - controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions
-- boot screen: shown on a visitor's first visit (press any button, then the startup swirl and chime); add `?boot` to the url to see it again
+- boot screen: plays every time the page opens (press any button, then the startup swirl and chime; pressing again skips it)
 - video marketplace: youtube and twitch open in-dashboard preview screens (latest uploads / live stream); the youtube screen uses the channel's videos-only playlist (`UULF…`, no shorts or streams) set in `SOCIALS` in `app.js`
 - avatar: a 60fps idle loop recorded from the [360sona](https://360sona.com) avatar. `assets/avatar.mp4` (webm fallback) holds colour on the left half and transparency on the right, recombined in the browser with webgl; `assets/avatar.webp` is its first frame and shows instantly
 - images: `assets/gamerpic.png` (gamer picture), `assets/cod4.jpg` (disc tile art)

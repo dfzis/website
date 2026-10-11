@@ -1260,7 +1260,6 @@
 
     // ── boot ───────────────────────────────────────────────
     // Sound needs a user gesture, so the boot waits on "press any button" before the swirl and chime.
-    // Shown on a visitor's first visit; add ?boot to the URL to see it again.
     let bootEl = null;
     let bootTimer = 0;
 
@@ -1297,7 +1296,6 @@
 
     function endBoot() {
         clearTimeout(bootTimer);
-        store.set('mz.booted', true);
         const el = bootEl;
         bootEl = null;
         booting = false;
@@ -1348,6 +1346,5 @@
     setInterval(checkLive, LIVE_POLL_MS);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) checkLive(); });
 
-    if (new URLSearchParams(location.search).has('boot') || !store.get('mz.booted', false)) showBoot();
-    else intro();
+    showBoot();
 })();
