@@ -10,8 +10,10 @@ mewzah's personal site: an xbox 360 nxe-style dashboard. plain html/css/js, no b
 - images: `assets/gamerpic.png` (gamer picture), `assets/cod4.jpg` (disc tile art)
 - live status: every 2 minutes the page asks decapi.me (free, no key) whether the twitch channel is live; when it is, the twitch tile shows LIVE, the gamercard says what's being streamed and a pop-up announces it
 - music: `assets/song.mp3` starts on the first key press or tap and loops; visitors can turn it off in system settings
+- font: uses convection (the real 360 dashboard font) when it's installed on the visitor's computer, otherwise the free barlow, self-hosted in `assets/fonts` under the SIL open font license
 - sound effects are synthesized; to use real files, put them in `assets/sfx/` and list them in `SFX_FILES` in `app.js`
 
 ## credits
 
 - avatar by [360sona](https://360sona.com), a free fan-made xbox 360 avatar builder. thank you!
+- [barlow](https://github.com/jpt/barlow) by jeremy tribby, SIL open font license 1.1 (`assets/fonts/OFL.txt`)
