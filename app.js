@@ -20,6 +20,14 @@
     const GAME = { title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg' };
     const SONG = { title: 'Zen Garden', artist: 'Xbox 360 Ambience' };
 
+    // Sponsor. Set code to your creator code to show "Use code …" and a copy button on the Geobox screen.
+    const GEOBOX = {
+        href: 'https://geobox.ai/',
+        code: null,
+        regions: ['new-york', 'chicago', 'atlanta', 'texas', 'california', 'phoenix', 'seattle', 'mexico', 'london', 'stockholm', 'brazil', 'sydney'],
+        modes: ['Resurgence Quads', 'Resurgence Duos', 'Battle Royale Quads', 'Resurgence Casuals', 'Black Ops Royale'],
+    };
+
     // Free Twitch status service (no API key). Uptime replies with a duration when live, '<name> is offline' otherwise.
     const TWITCH_STATUS = 'https://decapi.me/twitch';
     const LIVE_POLL_MS = 120000;
@@ -67,6 +75,7 @@
                     extra: [['x', 'Eject', eject], ['y', 'Game Details', () => openScreen('game')]],
                 },
                 { kind: 'gamercard', label: 'Gamer Profile', screen: 'profile' },
+                { kind: 'geobox', label: 'Geobox', screen: 'geobox' },
                 { label: 'Game Library', icon: 'controller', screen: 'game' },
                 { label: 'Video Library', icon: 'camera', go: 'Video Marketplace' },
                 { label: 'Music Library', icon: 'note', screen: 'music' },
@@ -456,6 +465,10 @@
             const loc = make('span', 't-loc', PROFILE.location);
             loc.lang = 'ja';
             el.append(socials, make('span', 't-status', presence()), loc);
+        } else if (t.kind === 'geobox') {
+            el.classList.add('t-geobox');
+            el.insertAdjacentHTML('beforeend', '<span class="gbx-glyph" aria-hidden="true"><i></i></span>');
+            el.append(make('span', 'partner-badge', 'PARTNER'), make('span', 't-label', t.label));
         } else if (t.kind === 'disc') {
             el.classList.add('t-disc');
             el.style.setProperty('--art', `url("${GAME.art}")`);
@@ -700,6 +713,7 @@
         youtube: { title: 'YouTube', render: renderYouTube },
         twitch: { title: 'Twitch', render: renderTwitch },
         game: { title: 'Game Details', render: renderGame },
+        geobox: { title: 'Geobox', render: renderGeobox },
         music: { title: 'Music Library', render: renderMusic },
         settings: { title: 'System Settings', render: renderSettings },
     };
@@ -775,6 +789,110 @@
         list.append(make('p', 'list-head', live.on ? `Live now · ${statText(s)}` : statText(s)));
         body.append(list);
         return [item(list, 'Open on Twitch', (src) => openLink(s.href, src), undefined, 'twitch')];
+    }
+
+    // A playable mock of Geobox's Discord search panel, after the demo on geobox.ai.
+    const gbx = { region: 0, mode: 0, timers: [], items: null };
+    const regionName = () => GEOBOX.regions[gbx.region].split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
+
+    function gbxStop() {
+        gbx.timers.forEach(clearTimeout);
+        gbx.timers = [];
+    }
+
+    function gbxStatus(msg, phase) {
+        const card = screenEl.querySelector('.gbx-card');
+        if (!card) return;
+        card.querySelector('.gbx-msg').textContent = msg;
+        card.dataset.phase = phase;
+        const fill = card.querySelector('.gbx-bar i');
+        if (phase === 'search') {
+            fill.style.transition = 'none';
+            fill.style.width = '0%';
+            void fill.offsetWidth;
+            fill.style.transition = 'width 2.6s linear';
+            fill.style.width = '100%';
+        } else if (phase === 'done') {
+            fill.style.transition = 'width .2s ease-out';
+            fill.style.width = '100%';
+        } else if (phase === 'idle') {
+            fill.style.transition = 'none';
+            fill.style.width = '0%';
+        }
+    }
+
+    function gbxPaint() {
+        const panel = screenEl.querySelector('.gbx');
+        if (!panel) return;
+        const region = GEOBOX.regions[gbx.region];
+        panel.querySelectorAll('.gbx-regions li').forEach((li, i) => li.classList.toggle('on', i === gbx.region));
+        panel.querySelector('.gbx-chan b').textContent = `# ${region}`;
+        panel.querySelector('.gbx-mode').textContent = GEOBOX.modes[gbx.mode];
+        if (gbx.items) {
+            gbx.items.region.el.querySelector('.val').textContent = regionName();
+            gbx.items.mode.el.querySelector('.val').textContent = GEOBOX.modes[gbx.mode];
+        }
+        gbxStatus('Idle · pick a region and mode, then search', 'idle');
+    }
+
+    function gbxCycle(key, d) {
+        const len = key === 'region' ? GEOBOX.regions.length : GEOBOX.modes.length;
+        gbx[key] = (gbx[key] + d + len) % len;
+        gbxStop();
+        gbxPaint();
+    }
+
+    function gbxSearch() {
+        gbxStop();
+        const region = GEOBOX.regions[gbx.region];
+        const mode = GEOBOX.modes[gbx.mode];
+        const map = mode.startsWith('Resurgence') ? ' · Rebirth Island' : '';
+        gbxStatus(`Searching #${region} · ${mode}`, 'search');
+        gbx.timers.push(setTimeout(() => {
+            gbxStatus('Bots joined your party · 3BOX active', 'search');
+            sfx.move();
+        }, 1700));
+        gbx.timers.push(setTimeout(() => {
+            gbxStatus(`Lobby found${map} · party code sent`, 'done');
+            toast(`Geobox: lobby found in ${regionName()}`);
+        }, 2800));
+    }
+
+    function renderGeobox(body) {
+        const panel = make('div', 'panel gbx');
+        panel.innerHTML =
+            '<div class="gbx-side"><p class="gbx-server"><span class="gbx-mini"></span>Geobox</p>' +
+            '<p class="gbx-cat">Warzone 3box regions</p><ul class="gbx-regions"></ul></div>' +
+            '<div class="gbx-main"><p class="gbx-chan"><b></b><span>Lobbies, Resurgence, BR, Casuals &amp; LTMs</span></p>' +
+            '<div class="gbx-card" data-phase="idle"><p class="gbx-card-title">Geobox Search Panel</p>' +
+            '<dl><dt>User</dt><dd class="gbx-user"></dd><dt>Mode</dt><dd class="gbx-mode"></dd><dt>3BOX</dt><dd>Active <i class="gbx-ok"></i></dd></dl>' +
+            '<div class="gbx-status"><p class="gbx-msg"></p><div class="gbx-bar"><i></i></div></div>' +
+            '<p class="gbx-note"><b>Smart Search</b> avoids matching with other Geobox users. <b>Party Code</b> sends you the bot\'s party code to join.</p></div>' +
+            '<div class="gbx-btns"><span class="gbx-go">▶ Search</span><span>⚡ Smart Search</span><span>♥ Favorite Search</span></div></div>';
+        panel.querySelector('.gbx-user').textContent = PROFILE.tag;
+        const ul = panel.querySelector('.gbx-regions');
+        GEOBOX.regions.forEach((r) => ul.append(make('li', '', `# ${r}`)));
+        const list = make('div', 'list compact');
+        list.append(make('p', 'list-head', GEOBOX.code ? `Use code ${GEOBOX.code}` : 'Automated 2box & 3box for Warzone'));
+        body.append(panel, list);
+
+        const search = item(list, 'Search', () => gbxSearch());
+        const region = item(list, 'Region', () => gbxCycle('region', 1), regionName());
+        const mode = item(list, 'Mode', () => gbxCycle('mode', 1), GEOBOX.modes[gbx.mode]);
+        region.cycle = (d) => gbxCycle('region', d);
+        mode.cycle = (d) => gbxCycle('mode', d);
+        gbx.items = { region, mode };
+        const items = [search, region, mode];
+        if (GEOBOX.code) {
+            items.push(item(list, `Copy code ${GEOBOX.code}`, () => {
+                const done = () => toast(`Geobox code ${GEOBOX.code} copied`);
+                if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(GEOBOX.code).then(done, done);
+                else done();
+            }));
+        }
+        items.push(item(list, 'Get Geobox', (src) => openLink(GEOBOX.href, src)));
+        requestAnimationFrame(gbxPaint);
+        return items;
     }
 
     function renderGame(body) {
@@ -892,6 +1010,8 @@
     }
 
     function closeScreen() {
+        gbxStop();
+        gbx.items = null;
         // Hidden screens stay in the DOM for the fade-out; embedded players must go now or they keep playing.
         screenEl.querySelectorAll('iframe').forEach((f) => f.remove());
         if (musicHeld) {
@@ -928,8 +1048,12 @@
             case 'left':
             case 'right': {
                 const d = action === 'right' ? 1 : -1;
+                const focused = state.screen && state.items[state.sel];
                 if (!state.screen) moveTile(d);
-                else if (state.screen === 'music' && songReady()) song.currentTime = Math.max(0, Math.min(song.duration, song.currentTime + d * 10));
+                else if (focused && focused.cycle) {
+                    focused.cycle(d);
+                    sfx.move();
+                } else if (state.screen === 'music' && songReady()) song.currentTime = Math.max(0, Math.min(song.duration, song.currentTime + d * 10));
                 break;
             }
             case 'up':

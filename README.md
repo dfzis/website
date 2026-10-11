@@ -8,6 +8,7 @@ mewzah's personal site: an xbox 360 nxe-style dashboard. plain html/css/js, no b
 - video marketplace: youtube and twitch open in-dashboard preview screens (latest uploads / live stream); the youtube screen uses the channel's videos-only playlist (`UULF…`, no shorts or streams) set in `SOCIALS` in `app.js`
 - avatar: a 60fps idle loop recorded from the [360sona](https://360sona.com) avatar. `assets/avatar.mp4` (webm fallback) holds colour on the left half and transparency on the right, recombined in the browser with webgl; `assets/avatar.webp` is its first frame and shows instantly
 - images: `assets/gamerpic.png` (gamer picture), `assets/cod4.jpg` (disc tile art)
+- geobox (sponsor): a partner tile in my xbox opening a playable mock of geobox's search panel; set `GEOBOX.code` in `app.js` to show a creator code with a copy button
 - live status: every 2 minutes the page asks decapi.me (free, no key) whether the twitch channel is live; when it is, the twitch tile shows LIVE, the gamercard says what's being streamed and a pop-up announces it
 - music: `assets/song.mp3` starts on the first key press or tap and loops; visitors can turn it off in system settings
 - font: uses convection (the real 360 dashboard font) when it's installed on the visitor's computer, otherwise the free barlow, self-hosted in `assets/fonts` under the SIL open font license
