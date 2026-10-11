@@ -20,10 +20,10 @@
     const GAME = { title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg' };
     const SONG = { title: 'Zen Garden', artist: 'Xbox 360 Ambience' };
 
-    // Sponsor. Set code to your creator code to show "Use code …" and a copy button on the Geobox screen.
+    // Sponsor. code shows "Use code …" and a copy button on the Geobox screen (null hides them).
     const GEOBOX = {
         href: 'https://geobox.ai/',
-        code: null,
+        code: 'mewzah',
         regions: ['new-york', 'chicago', 'atlanta', 'texas', 'california', 'phoenix', 'seattle', 'mexico', 'london', 'stockholm', 'brazil', 'sydney'],
         modes: ['Resurgence Quads', 'Resurgence Duos', 'Battle Royale Quads', 'Resurgence Casuals', 'Black Ops Royale'],
     };
@@ -467,8 +467,13 @@
             el.append(socials, make('span', 't-status', presence()), loc);
         } else if (t.kind === 'geobox') {
             el.classList.add('t-geobox');
-            el.insertAdjacentHTML('beforeend', '<span class="gbx-glyph" aria-hidden="true"><i></i></span>');
+            el.insertAdjacentHTML('beforeend', '<span class="gbx-glyph" aria-hidden="true"></span>');
             el.append(make('span', 'partner-badge', 'PARTNER'), make('span', 't-label', t.label));
+            if (GEOBOX.code) {
+                const code = make('span', 'gbx-code', 'code ');
+                code.append(make('b', '', GEOBOX.code));
+                el.append(code);
+            }
         } else if (t.kind === 'disc') {
             el.classList.add('t-disc');
             el.style.setProperty('--art', `url("${GAME.art}")`);
