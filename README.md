@@ -2,6 +2,8 @@
 
 mewzah's personal site: an xbox 360 nxe-style dashboard. plain html/css/js, no build step.
 
+hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are served as-is). © mewzah, all rights reserved.
+
 - content (profile, gamerscore, socials and follower counts, channels, song title): top of `app.js`
 - controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions
 - boot screen: plays every time the page opens (press any button, then the startup swirl and chime; pressing again skips it)
