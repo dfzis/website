@@ -20,6 +20,10 @@
     const GAME = { title: 'Call of Duty 4: Modern Warfare', short: 'Call of Duty 4', art: 'assets/cod4.jpg' };
     const SONG = { title: 'Zen Garden', artist: 'Xbox 360 Ambience' };
 
+    // Free Twitch status service (no API key). Uptime replies with a duration when live, '<name> is offline' otherwise.
+    const TWITCH_STATUS = 'https://decapi.me/twitch';
+    const LIVE_POLL_MS = 120000;
+
     // Optional real sound files, e.g. { select: 'assets/sfx/select.wav' }. Missing entries are synthesized.
     const SFX_FILES = {};
 
@@ -91,6 +95,8 @@
 
     const n = CHANNELS.length;
     let booting = false;
+    const live = { on: false, game: '', announced: false };
+    const presence = () => (live.on ? (live.game ? `Streaming ${live.game}` : 'Live on Twitch') : 'Online');
     const state = {
         ch: n - 1,
         focus: CHANNELS.map(() => 0),
@@ -449,7 +455,7 @@
             });
             const loc = make('span', 't-loc', PROFILE.location);
             loc.lang = 'ja';
-            el.append(socials, make('span', 't-status', 'Online'), loc);
+            el.append(socials, make('span', 't-status', presence()), loc);
         } else if (t.kind === 'disc') {
             el.classList.add('t-disc');
             el.style.setProperty('--art', `url("${GAME.art}")`);
@@ -457,6 +463,7 @@
         } else {
             el.insertAdjacentHTML('beforeend', glyph(t.icon));
             el.append(make('span', 't-label', t.label));
+            if (t.icon === 'twitch') el.append(make('span', 'live-badge', 'LIVE'));
         }
         return el;
     }
@@ -722,7 +729,7 @@
         pic.src = PROFILE.gamerpic;
         const info = make('div', 'gc-info');
         const status = make('p', 'gc-status');
-        status.append(make('i', 'dot'), document.createTextNode('Online'));
+        status.append(make('i', 'dot'), make('span', 'presence', presence()));
         const dl = make('dl');
         const loc = make('dd', '', PROFILE.location);
         loc.lang = 'ja';
@@ -765,7 +772,7 @@
         const s = SOCIALS.twitch;
         renderEmbed(body, `https://player.twitch.tv/?channel=${encodeURIComponent(s.handle)}&parent=${location.hostname}&autoplay=true&muted=false`, `${s.name}: ${s.handle}`);
         const list = make('div', 'list compact');
-        list.append(make('p', 'list-head', statText(s)));
+        list.append(make('p', 'list-head', live.on ? `Live now · ${statText(s)}` : statText(s)));
         body.append(list);
         return [item(list, 'Open on Twitch', (src) => openLink(s.href, src), undefined, 'twitch')];
     }
@@ -1297,7 +1304,49 @@
         el.classList.add('out');
         setTimeout(() => el.remove(), 700);
         intro();
+        if (live.on && !live.announced) announceLive();
     }
+
+    // ── live status ────────────────────────────────────────
+    function announceLive() {
+        live.announced = true;
+        toast(`${PROFILE.tag} is ${live.game ? `streaming ${live.game}` : 'live on Twitch'}`);
+    }
+
+    function setLive(on, game) {
+        if (on === live.on && game === live.game) return;
+        live.on = on;
+        live.game = game;
+        document.body.classList.toggle('is-live', on);
+        document.querySelectorAll('.t-status, .gc-status .presence').forEach((el) => { el.textContent = presence(); });
+        const head = state.screen === 'twitch' && screenEl.querySelector('.list-head');
+        if (head) head.textContent = on ? `Live now · ${statText(SOCIALS.twitch)}` : statText(SOCIALS.twitch);
+        if (on && !live.announced && !booting) announceLive();
+        if (!on) live.announced = false;
+    }
+
+    async function checkLive() {
+        if (document.hidden) return;
+        const user = encodeURIComponent(SOCIALS.twitch.handle);
+        try {
+            const res = await fetch(`${TWITCH_STATUS}/uptime/${user}`, { cache: 'no-store' });
+            const text = (await res.text()).trim();
+            const on = res.ok && !/offline/i.test(text) && /\d+\s+(second|minute|hour|day)/.test(text);
+            let game = '';
+            if (on) {
+                const g = await fetch(`${TWITCH_STATUS}/game/${user}`, { cache: 'no-store' });
+                game = g.ok ? (await g.text()).trim() : '';
+                if (game.length > 60 || /error|not found|offline/i.test(game)) game = '';
+            }
+            setLive(on, game);
+        } catch {
+            // network hiccup: keep the last known state
+        }
+    }
+
+    checkLive();
+    setInterval(checkLive, LIVE_POLL_MS);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) checkLive(); });
 
     if (new URLSearchParams(location.search).has('boot') || !store.get('mz.booted', false)) showBoot();
     else intro();
