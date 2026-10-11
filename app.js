@@ -1270,7 +1270,7 @@
         bootEl.setAttribute('role', 'dialog');
         bootEl.setAttribute('aria-label', 'Press any button to start');
         bootEl.innerHTML = '<div class="boot-stage"><span class="boot-ring r1"></span><span class="boot-ring r2"></span>' +
-            '<span class="boot-ring r3"></span><span class="boot-flash"></span><span class="boot-orb"></span><p class="boot-name"></p></div>' +
+            '<span class="boot-ring r3"></span><span class="boot-flash"></span><img class="boot-orb" src="assets/logo.webp" alt="" draggable="false"><p class="boot-name"></p></div>' +
             '<p class="boot-prompt"><b class="pad pad-a">A</b>Press any button to start</p>';
         bootEl.querySelector('.boot-name').textContent = PROFILE.tag;
         bootEl.addEventListener('click', bootPress);
