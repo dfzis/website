@@ -10,7 +10,7 @@
 
     // count: a number shows "12.5K followers"; null shows the handle instead.
     const SOCIALS = {
-        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: 32000, unit: 'subscribers' },
+        youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: 32000, unit: 'subscribers', uploads: 'UUEPXFafBx8AEAU7EnARmSnw' },
         twitch: { name: 'Twitch', handle: 'mewzah', href: 'https://www.twitch.tv/mewzah', count: 4400, unit: 'followers' },
         tiktok: { name: 'TikTok', handle: 'new account', href: 'https://www.tiktok.com/@mewzah', count: null, unit: 'followers' },
         x: { name: 'X', handle: '@mewzah1', href: 'https://x.com/mewzah1', count: 1600, unit: 'followers' },
@@ -47,7 +47,11 @@
         },
         {
             name: 'Video Marketplace',
-            tiles: [social('youtube'), social('twitch'), social('tiktok')],
+            tiles: [
+                { label: 'YouTube', icon: 'youtube', screen: 'youtube' },
+                { label: 'Twitch', icon: 'twitch', screen: 'twitch' },
+                social('tiktok'),
+            ],
         },
         {
             name: 'My Xbox',
@@ -86,6 +90,7 @@
     const legendEl = $('#legend');
 
     const n = CHANNELS.length;
+    let booting = false;
     const state = {
         ch: n - 1,
         focus: CHANNELS.map(() => 0),
@@ -234,6 +239,11 @@
             }),
             notify: () => play('notify', (t) => {
                 [1318.5, 1760, 2093].forEach((f, i) => tone(f, t + i * 0.07, 0.7, { gain: 0.045 }));
+            }),
+            boot: () => play('boot', (t) => {
+                noise(t, 1.3, { gain: 0.08, f0: 250, f1: 3200, q: 0.7 });
+                [220, 329.63, 440, 554.37, 659.25].forEach((f, i) => tone(f, t + 1.15 + i * 0.03, 2.6, { gain: 0.032, attack: 0.12 }));
+                [1760, 2217.46, 2637.02, 3520].forEach((f, i) => tone(f, t + 1.25 + i * 0.09, 0.9, { gain: 0.016, type: 'triangle' }));
             }),
             eject: () => play('eject', (t) => {
                 tone(2200, t, 0.03, { gain: 0.04, type: 'square' });
@@ -680,6 +690,8 @@
     // ── screens ────────────────────────────────────────────
     const SCREENS = {
         profile: { title: 'Gamer Profile', render: renderProfile },
+        youtube: { title: 'YouTube', render: renderYouTube },
+        twitch: { title: 'Twitch', render: renderTwitch },
         game: { title: 'Game Details', render: renderGame },
         music: { title: 'Music Library', render: renderMusic },
         settings: { title: 'System Settings', render: renderSettings },
@@ -723,6 +735,39 @@
         body.append(card, list);
         return Object.entries(SOCIALS).map(([key, s]) =>
             item(list, s.name, (src) => (s.href ? openLink(s.href, src) : copyText(s.copy)), statText(s), key));
+    }
+
+    function renderEmbed(body, src, label) {
+        const panel = make('div', 'panel embed');
+        const frame = make('iframe');
+        frame.src = src;
+        frame.title = label;
+        frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+        frame.allowFullscreen = true;
+        frame.referrerPolicy = 'strict-origin-when-cross-origin';
+        panel.append(frame);
+        body.append(panel);
+    }
+
+    function renderYouTube(body) {
+        const s = SOCIALS.youtube;
+        renderEmbed(body, `https://www.youtube-nocookie.com/embed/videoseries?list=${s.uploads}&autoplay=1&rel=0&playsinline=1`, `${s.name}: latest uploads`);
+        const list = make('div', 'list compact');
+        list.append(make('p', 'list-head', statText(s)));
+        body.append(list);
+        return [
+            item(list, 'Open Channel', (src) => openLink(s.href, src), undefined, 'youtube'),
+            item(list, 'Subscribe', (src) => openLink(`${s.href}?sub_confirmation=1`, src)),
+        ];
+    }
+
+    function renderTwitch(body) {
+        const s = SOCIALS.twitch;
+        renderEmbed(body, `https://player.twitch.tv/?channel=${encodeURIComponent(s.handle)}&parent=${location.hostname}&autoplay=true&muted=false`, `${s.name}: ${s.handle}`);
+        const list = make('div', 'list compact');
+        list.append(make('p', 'list-head', statText(s)));
+        body.append(list);
+        return [item(list, 'Open on Twitch', (src) => openLink(s.href, src), undefined, 'twitch')];
     }
 
     function renderGame(body) {
@@ -818,7 +863,15 @@
         renderLegend();
     }
 
+    // The dashboard music would fight the video's audio, so it pauses while a video screen is open.
+    const VIDEO_SCREENS = new Set(['youtube', 'twitch']);
+    let musicHeld = false;
+
     function openScreen(key) {
+        if (VIDEO_SCREENS.has(key) && !song.paused) {
+            song.pause();
+            musicHeld = true;
+        }
         state.screen = key;
         state.sel = 0;
         renderScreen();
@@ -832,6 +885,12 @@
     }
 
     function closeScreen() {
+        // Hidden screens stay in the DOM for the fade-out; embedded players must go now or they keep playing.
+        screenEl.querySelectorAll('iframe').forEach((f) => f.remove());
+        if (musicHeld) {
+            musicHeld = false;
+            if (settings.music) song.play().catch(() => {});
+        }
         state.screen = null;
         state.items = [];
         stage.classList.remove('in-screen');
@@ -854,6 +913,10 @@
 
     // ── input ──────────────────────────────────────────────
     function input(action, src) {
+        if (booting) {
+            if (src !== 'wheel') bootPress();
+            return;
+        }
         switch (action) {
             case 'left':
             case 'right': {
@@ -1177,10 +1240,65 @@
     $('.tr-pic').src = PROFILE.gamerpic;
     resize();
     layoutChannels(false);
-    chEls.forEach((el, i) => el.animate([{ opacity: 0 }, { opacity: el.style.opacity }], { duration: 600, delay: 100 + i * 60, fill: 'backwards' }));
     row = buildRow(state.ch);
     row.el.classList.add('no-anim');
-    layoutRow(settings.motion);
+    layoutRow(false);
     requestAnimationFrame(() => requestAnimationFrame(() => row.el.classList.remove('no-anim')));
     requestAnimationFrame(frame);
+
+    function intro() {
+        chEls.forEach((el, i) => el.animate([{ opacity: 0 }, { opacity: el.style.opacity }], { duration: 600, delay: 100 + i * 60, fill: 'backwards' }));
+        if (settings.motion) layoutRow(true);
+    }
+
+    // ── boot ───────────────────────────────────────────────
+    // Sound needs a user gesture, so the boot waits on "press any button" before the swirl and chime.
+    // Shown on a visitor's first visit; add ?boot to the URL to see it again.
+    let bootEl = null;
+    let bootTimer = 0;
+
+    function showBoot() {
+        booting = true;
+        bootEl = make('div', 'boot');
+        bootEl.setAttribute('role', 'dialog');
+        bootEl.setAttribute('aria-label', 'Press any button to start');
+        bootEl.innerHTML = '<div class="boot-stage"><span class="boot-ring r1"></span><span class="boot-ring r2"></span>' +
+            '<span class="boot-ring r3"></span><span class="boot-flash"></span><span class="boot-orb"></span><p class="boot-name"></p></div>' +
+            '<p class="boot-prompt"><b class="pad pad-a">A</b>Press any button to start</p>';
+        bootEl.querySelector('.boot-name').textContent = PROFILE.tag;
+        bootEl.addEventListener('click', bootPress);
+        document.body.append(bootEl);
+    }
+
+    function bootPress() {
+        if (!bootEl) return;
+        if (bootEl.classList.contains('play')) {
+            endBoot();
+            return;
+        }
+        sfx.unlock();
+        sfx.boot();
+        startMusic();
+        wakeAvatar();
+        if (!settings.motion) {
+            endBoot();
+            return;
+        }
+        bootEl.classList.add('play');
+        bootTimer = setTimeout(endBoot, 3200);
+    }
+
+    function endBoot() {
+        clearTimeout(bootTimer);
+        store.set('mz.booted', true);
+        const el = bootEl;
+        bootEl = null;
+        booting = false;
+        el.classList.add('out');
+        setTimeout(() => el.remove(), 700);
+        intro();
+    }
+
+    if (new URLSearchParams(location.search).has('boot') || !store.get('mz.booted', false)) showBoot();
+    else intro();
 })();
