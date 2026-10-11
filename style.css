@@ -1,5 +1,5 @@
 :root {
-    --font: "Segoe UI", "Selawik", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --font: "Convection", "Segoe UI", "Selawik", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     --ease: cubic-bezier(.2, .8, .2, 1);
     --lime:
         radial-gradient(130% 55% at 70% -5%, rgba(255, 255, 225, .9), rgba(255, 255, 210, 0) 60%),
