@@ -138,7 +138,7 @@
             name: 'My Xbox',
             tiles: [
                 discTile,
-                { kind: 'gamercard', label: 'Gamer Profile', screen: 'profile' },
+                { kind: 'gamercard', label: 'Gamer Profile', screen: 'profile', extra: [['y', 'Emote', () => playEmote()]] },
                 { label: 'Game Library', icon: 'controller', screen: 'library' },
                 ...(SETUP.length ? [{ label: 'My Setup', icon: 'monitor', screen: 'setup' }] : []),
                 { label: 'System Settings', icon: 'gear', screen: 'settings' },
@@ -151,6 +151,8 @@
     // The still is its first frame, so the hand-off from image to video is seamless.
     const AVATAR_STILL = 'assets/avatar.webp';
     const AVATAR_VIDEO = [['assets/avatar.mp4', 'video/mp4'], ['assets/avatar.webm', 'video/webm']];
+    // One-off emotes from the 360sona photo booth (same colour|alpha layout), played on Y / tapping the avatar.
+    const EMOTES = ['wave', 'celebrate', 'laugh', 'pickme'];
 
     const GCOIN = '<svg class="gcoin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="#fff" stroke-width="1.7"/><text x="10" y="14.3" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="Segoe UI, Arial, sans-serif">G</text></svg>';
 
@@ -1094,7 +1096,12 @@
     avatarEl.append(still);
     avatarLayer.append(avatarEl);
     rowsEl.append(avatarLayer);
+    let playEmote = () => {};
     const avatarVideo = startAvatarVideo();
+    // Tapping the avatar plays an emote (only while its tile is focused; otherwise taps go to the tiles).
+    avatarEl.addEventListener('click', () => {
+        if (!state.screen && !guide.open && state.ch === AV_CH && state.focus[AV_CH] === AV_TILE) playEmote();
+    });
 
     // Browsers can't play video with transparency everywhere (Safari), so the alpha travels as
     // a second picture beside the colour and a tiny WebGL shader recombines them.
@@ -1143,22 +1150,68 @@
             video.append(s);
         });
 
-        const paint = () => {
-            if (video.readyState >= 2) {
-                if (view.width !== video.videoWidth / 2) {
-                    view.width = video.videoWidth / 2;
-                    view.height = video.videoHeight;
-                    gl.viewport(0, 0, view.width, view.height);
-                }
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
-                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                avatarEl.classList.add('live');
+        const draw = (v) => {
+            if (v.readyState < 2) return false;
+            if (view.width !== v.videoWidth / 2 || view.height !== v.videoHeight) {
+                view.width = v.videoWidth / 2;
+                view.height = v.videoHeight;
+                gl.viewport(0, 0, view.width, view.height);
             }
-            if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(paint);
-            else requestAnimationFrame(paint);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, v);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            avatarEl.classList.add('live');
+            return true;
         };
-        video.addEventListener('playing', paint, { once: true });
-        avatarEl.append(view, video);
+        // The one canvas shows either the idle loop or an emote; switching never adds a second WebGL layer.
+        let token = 0;
+        const run = (v, first) => {
+            const t = ++token;
+            let fresh = true;
+            const step = () => {
+                if (t !== token) return;
+                if (draw(v) && fresh) {
+                    fresh = false;
+                    if (first) first();
+                }
+                if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(step);
+                else requestAnimationFrame(step);
+            };
+            step();
+        };
+        video.addEventListener('playing', () => run(video), { once: true });
+
+        const emote = make('video', 'av-src');
+        emote.muted = true;
+        emote.playsInline = true;
+        emote.preload = 'auto';
+        emote.setAttribute('muted', '');
+        emote.setAttribute('playsinline', '');
+        let emoting = false;
+        let last = -1;
+        playEmote = () => {
+            if (emoting || !avatarEl.classList.contains('live')) return;
+            let i;
+            do i = Math.floor(Math.random() * EMOTES.length); while (EMOTES.length > 1 && i === last);
+            last = i;
+            emoting = true;
+            emote.replaceChildren(...[['mp4', 'video/mp4'], ['webm', 'video/webm']].map(([ext, type]) => {
+                const src = make('source');
+                src.src = `assets/emotes/${EMOTES[i]}.${ext}`;
+                src.type = type;
+                return src;
+            }));
+            emote.load();
+            const back = () => {
+                emoting = false;
+                run(video, () => view.classList.remove('emote'));
+            };
+            emote.onended = back;
+            emote.onerror = back;
+            emote.addEventListener('playing', () => run(emote, () => view.classList.add('emote')), { once: true });
+            emote.play().catch(back);
+        };
+
+        avatarEl.append(view, video, emote);
         video.play().catch(() => {});
         return video;
     }
@@ -1192,6 +1245,7 @@
             const st = avatarStyle(AV_TILE - f);
             avatarEl.style.transform = st.t;
             avatarEl.style.opacity = st.o;
+            avatarEl.classList.toggle('hit', f === AV_TILE);
             if (enterFromRight) enterAnim(avatarEl, st, 120 + AV_TILE * 60);
         }
         countEl.textContent = `${f + 1} of ${row.tiles.length}`;
@@ -1255,6 +1309,7 @@
         row.el.animate([{ transform: `translateY(${dir * 90}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
 
         if (old.ci === AV_CH) {
+            avatarEl.classList.remove('hit');
             avatarLayer.animate([{ transform: 'none', opacity: 1 }, { transform: `translateY(${-dir * 90}px)`, opacity: AV_HIDDEN }], { duration: 360, easing: ease, fill: 'forwards' });
         } else if (i === AV_CH) {
             avatarLayer.getAnimations().forEach((a) => a.cancel());

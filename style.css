@@ -1386,3 +1386,18 @@ button:focus-visible { outline: none; }
 @keyframes rr-blink { 50% { fill: #3c0c07; } }
 .rr-msg { font-size: clamp(16px, 2.6vmin, 24px); color: #d2d2d2; }
 .rr-sub { font-size: clamp(13px, 2vmin, 18px); }
+
+/* ── avatar emotes ──────────────────────────────────────── */
+/* The photo booth frames the avatar smaller and wider than the idle capture: this box lines their feet and
+   height up with the idle loop (scale .882 of the 398x496 crop). */
+.av-anim.emote {
+    left: -47.8px;
+    top: -14.4px;
+    width: 351.1px;
+    height: 437.5px;
+}
+.avatar.hit .av-anim,
+.avatar.hit .av-still {
+    pointer-events: auto;
+    cursor: pointer;
+}
