@@ -39,9 +39,6 @@
     // My Setup screen in My Xbox, e.g. { label: 'Controller', item: 'SCUF Reflex Pro', href: 'https://…' } (empty hides the tile).
     const SETUP = [];
 
-    // Visitor stats with GoatCounter: the name before .goatcounter.com (null turns it off).
-    const ANALYTICS = { goatcounter: null };
-
     // YouTube subscribers and latest upload, refreshed every few hours by .github/workflows/stats.yml.
     const STATS_URL = 'data/stats.json';
 
@@ -382,7 +379,6 @@
     function openLink(href, src) {
         const key = Object.keys(SOCIALS).find((k) => SOCIALS[k].href && href.startsWith(SOCIALS[k].href));
         if (key) sawSocial(key);
-        track(`link/${key || href}`);
         if (href.startsWith('mailto:')) {
             location.href = href; // hands off to the mail app; the dashboard stays put
             return;
@@ -407,18 +403,6 @@
     // Low-power modes can refuse muted autoplay; a user gesture always allows it.
     function wakeAvatar() {
         if (avatarVideo && avatarVideo.paused) avatarVideo.play().catch(() => {});
-    }
-
-    // ── visitor stats ──────────────────────────────────────
-    function track(path, title) {
-        if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path, title: title || path, event: true });
-    }
-    if (ANALYTICS.goatcounter) {
-        const gc = make('script');
-        gc.async = true;
-        gc.src = 'https://gc.zgo.at/count.js';
-        gc.dataset.goatcounter = `https://${ANALYTICS.goatcounter}.goatcounter.com/count`;
-        document.head.append(gc);
     }
 
     // ── achievements ───────────────────────────────────────
@@ -450,7 +434,6 @@
         if (!a || achStore[id]) return;
         achStore[id] = Date.now();
         saveJSON('mz.ach', achStore);
-        track(`achievement/${id}`, a.name);
         achQueue.push(a);
         showAchievement();
         if (state.screen === 'achievements' || state.screen === 'profile') refreshScreen();
@@ -1430,7 +1413,6 @@
         state.screen = key;
         state.sel = 0;
         renderScreen();
-        track(`screen/${key}`);
         if (key === 'profile') unlock('profile');
         if (key === 'youtube' || key === 'twitch') sawSocial(key);
         if (key === 'twitch' && live.on) unlock('front');
