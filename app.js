@@ -39,6 +39,15 @@
     // My Setup screen in My Xbox, e.g. { label: 'Controller', item: 'SCUF Reflex Pro', href: 'https://…' } (empty hides the tile).
     const SETUP = [];
 
+    // Colour themes (System Settings / Guide). Each moves the site's greens to its hue; the controller's
+    // A button keeps its green, and photos, the Geobox logo and the red LIVE badge are untouched.
+    const THEMES = [
+        { id: 'green', name: 'Green' },
+        { id: 'blue', name: 'Blue', hue: 195, logo: 'assets/logo-blue.webp' },
+        { id: 'purple', name: 'Purple', hue: 272, lift: 0.3, logo: 'assets/logo-purple.webp' },
+        { id: 'orange', name: 'Orange', hue: 26, logo: 'assets/logo-orange.webp' },
+    ];
+
     // YouTube subscribers and latest upload, refreshed every few hours by .github/workflows/stats.yml.
     const STATS_URL = 'data/stats.json';
 
@@ -48,14 +57,15 @@
         { id: 'profile', name: 'Gamer Card', desc: "View mewzah's gamer profile.", g: 10, icon: 'card' },
         { id: 'surfer', name: 'Channel Surfer', desc: 'Visit every channel.', g: 15, icon: 'channels' },
         { id: 'tuned', name: 'Tuned In', desc: "Watch mewzah's latest YouTube upload.", g: 15, icon: 'youtube' },
-        { id: 'front', name: 'Front Row', desc: 'Open the Twitch screen while mewzah is live.', g: 25, icon: 'twitch' },
+        { id: 'front', name: 'Front Row', desc: 'Open the Twitch screen while mewzah is live.', g: 20, icon: 'twitch' },
         { id: 'social', name: 'Social Butterfly', desc: "Visit three of mewzah's socials.", g: 15, icon: 'people' },
         { id: 'eject', name: 'Tray Open', desc: 'Eject the disc.', g: 5, icon: 'eject' },
         { id: 'library', name: 'Disc Jockey', desc: 'Play every game in the Game Library.', g: 20, icon: 'disc' },
         { id: 'lobby', name: 'Lobby Found', desc: 'Find a lobby with Geobox.', g: 15, icon: 'geobox' },
-        { id: 'code', name: 'Supporter', desc: "Copy mewzah's Geobox creator code.", g: 25, icon: 'ticket' },
+        { id: 'code', name: 'Supporter', desc: "Copy mewzah's Geobox creator code.", g: 20, icon: 'ticket' },
         { id: 'settings', name: 'Fine Tuning', desc: 'Change a system setting.', g: 5, icon: 'gear' },
-        { id: 'konami', name: 'Old School', desc: 'Enter the Konami code.', g: 30, icon: 'controller', secret: true },
+        { id: 'konami', name: 'Old School', desc: 'Enter the Konami code.', g: 20, icon: 'controller', secret: true },
+        { id: 'rrod', name: 'Three Red Lights', desc: 'Hold Eject until something breaks.', g: 20, icon: 'ring', secret: true },
         { id: 'night', name: 'Night Owl', desc: 'Visit between midnight and 5am.', g: 10, icon: 'moon', secret: true },
     ];
 
@@ -81,6 +91,7 @@
         disc: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
         ticket: 'M3 6h18v4.2a1.8 1.8 0 0 0 0 3.6V18H3v-4.2a1.8 1.8 0 0 0 0-3.6zm6.2 1.6v8.8h1.6V7.6z',
         moon: 'M14.5 2.5A9.5 9.5 0 1 0 21.5 17 7.6 7.6 0 0 1 14.5 2.5z',
+        ring: 'M13.2 2.1A10 10 0 0 1 21.9 10.8h-3.2a6.9 6.9 0 0 0-5.5-5.5zM10.8 2.1v3.2a6.9 6.9 0 0 0-5.5 5.5H2.1a10 10 0 0 1 8.7-8.7zM2.1 13.2h3.2a6.9 6.9 0 0 0 5.5 5.5v3.2a10 10 0 0 1-8.7-8.7zm11.1 5.5a6.9 6.9 0 0 0 5.5-5.5h3.2a10 10 0 0 1-8.7 8.7z',
         lock: 'M7 10V7.5a5 5 0 0 1 10 0V10h1.5v11h-13V10zm2.2 0h5.6V7.5a2.8 2.8 0 0 0-5.6 0z',
         trophy: 'M7 3h10v2h3.5v2.5A4.5 4.5 0 0 1 16.4 12a5 5 0 0 1-3.4 2.8V17h3v3H8v-3h3v-2.2A5 5 0 0 1 7.6 12a4.5 4.5 0 0 1-4.1-4.5V5H7zM5.4 7v.5c0 1.2.8 2.2 1.9 2.5A9 9 0 0 1 7 7zm11.3 0a9 9 0 0 1-.3 3c1.1-.3 1.9-1.3 1.9-2.5V7z',
         mail: 'M2 5h20v14H2zm2.2 2.2v.4l7.8 5.3 7.8-5.3v-.4zm0 2.9v6.7h15.6v-6.7L12 15.4z',
@@ -313,6 +324,20 @@
                 [220, 329.63, 440, 554.37, 659.25].forEach((f, i) => tone(f, t + 1.15 + i * 0.03, 2.6, { gain: 0.032, attack: 0.12 }));
                 [1760, 2217.46, 2637.02, 3520].forEach((f, i) => tone(f, t + 1.25 + i * 0.09, 0.9, { gain: 0.016, type: 'triangle' }));
             }),
+            crash: () => play('crash', (t) => {
+                for (let i = 0; i < 7; i++) tone(110 + (i % 2) * 9, t + i * 0.085, 0.08, { gain: 0.06, type: 'square' });
+                noise(t, 0.6, { gain: 0.08, f0: 1400, f1: 260, q: 0.6 });
+            }),
+            guide: () => play('guide', (t) => {
+                noise(t, 0.22, { gain: 0.06, f0: 600, f1: 3200, q: 0.8 });
+                tone(784, t + 0.05, 0.18, { gain: 0.04, type: 'triangle' });
+                tone(1174.7, t + 0.11, 0.35, { gain: 0.035, type: 'triangle' });
+            }),
+            signin: () => play('signin', (t) => {
+                tone(659.25, t, 0.3, { gain: 0.05 });
+                tone(987.77, t + 0.09, 0.6, { gain: 0.045 });
+                tone(1318.5, t + 0.18, 0.7, { gain: 0.025, type: 'triangle' });
+            }),
             achievement: () => play('achievement', (t) => {
                 tone(330, t, 0.17, { gain: 0.075, to: 495 });
                 tone(660, t, 0.13, { gain: 0.03, type: 'triangle', to: 990 });
@@ -347,6 +372,110 @@
         const p = make('p', cls);
         p.innerHTML = `<span>${PROFILE.gamerscore}</span>${GCOIN}`;
         return p;
+    }
+
+    // ── themes ─────────────────────────────────────────────
+    const KEEP_GREEN = new Set(['d6f7a0', '5aa818', '2f6a08']); // controller A button
+    const COLOR_RE = /#([0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3})\b|(rgba?)\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+)\s*)?\)/gi;
+    const luma = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
+        if (max === min) return [0, 0, l];
+        const d = max - min;
+        const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+        return [h * 60, s, l];
+    }
+
+    function hslToRgb(h, s, l) {
+        const k = (n) => (n + h / 30) % 12;
+        const a = s * Math.min(l, 1 - l);
+        const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+        return [f(0), f(8), f(4)].map((v) => Math.round(v * 255));
+    }
+
+    // Greens (hue 45-165) squeezed around the theme hue, brightened towards the same perceived lightness
+    // (lift: how far; purple reads dark, so matching it fully turns it neon).
+    function shiftColor(r, g, b, hue, lift = 0.7) {
+        if (KEEP_GREEN.has([r, g, b].map((v) => v.toString(16).padStart(2, '0')).join(''))) return null;
+        const [h, s, l] = rgbToHsl(r, g, b);
+        if (h < 45 || h > 165 || s < 0.03) return null;
+        const nh = (hue + (h - 90) * 0.5 + 360) % 360;
+        const ns = Math.min(1, s < 0.3 ? s : s * 1.05);
+        const target = luma(r, g, b);
+        let lo = 0, hi = 1;
+        for (let i = 0; i < 24; i++) {
+            const mid = (lo + hi) / 2;
+            if (luma(...hslToRgb(nh, ns, mid)) < target) lo = mid;
+            else hi = mid;
+        }
+        return hslToRgb(nh, ns, l + (lo - l) * lift);
+    }
+
+    function recolor(text, hue, lift) {
+        return text.replace(COLOR_RE, (m, hex, fn, r, g, b, a) => {
+            if (hex) {
+                const t = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex;
+                const n = shiftColor(...[0, 2, 4].map((i) => parseInt(t.slice(i, i + 2), 16)), hue, lift);
+                return n ? `#${n.map((v) => v.toString(16).padStart(2, '0')).join('')}${t.slice(6)}` : m;
+            }
+            const n = shiftColor(Math.round(+r), Math.round(+g), Math.round(+b), hue, lift);
+            return n ? `${fn}(${n.join(', ')}${a !== undefined ? `, ${a}` : ''})` : m;
+        });
+    }
+
+    let theme = THEMES[0];
+    try {
+        theme = THEMES.find((t) => t.id === localStorage.getItem('mz.theme')) || theme;
+    } catch { /* storage unavailable */ }
+    const tc = (c) => (theme.hue ? recolor(c, theme.hue, theme.lift) : c);
+    const mainCss = document.querySelector('link[rel="stylesheet"]');
+    let baseCss = null;
+
+    function applyTheme(t) {
+        theme = t;
+        try {
+            localStorage.setItem('mz.theme', t.id);
+        } catch { /* storage unavailable */ }
+        let el = document.getElementById('theme-css');
+        if (!t.hue) {
+            if (el) el.remove();
+            mainCss.disabled = false;
+        } else {
+            (baseCss ? Promise.resolve(baseCss) : fetch(mainCss.href).then((r) => r.text()).then((css) => (baseCss = css)))
+                .then((css) => {
+                    if (theme !== t) return;
+                    if (!el) {
+                        el = make('style');
+                        el.id = 'theme-css';
+                        document.head.append(el);
+                    }
+                    el.textContent = recolor(css, t.hue, t.lift);
+                    mainCss.disabled = true;
+                }, () => {});
+        }
+        document.querySelectorAll('#glyph-fill stop').forEach((stop) => {
+            stop.dataset.c = stop.dataset.c || stop.getAttribute('stop-color');
+            stop.setAttribute('stop-color', tc(stop.dataset.c));
+        });
+        const meta = document.querySelector('meta[name="theme-color"]');
+        meta.dataset.c = meta.dataset.c || meta.content;
+        meta.content = tc(meta.dataset.c);
+        const logo = document.querySelector('.boot-orb');
+        if (logo) logo.src = t.logo || 'assets/logo.webp';
+        if (W) {
+            paintStatic();
+            needsDraw = true;
+        }
+    }
+
+    function cycleTheme(d) {
+        const i = THEMES.indexOf(theme);
+        applyTheme(THEMES[(i + d + THEMES.length) % THEMES.length]);
+        unlock('settings');
+        toast(`Theme: ${theme.name}`, true);
     }
 
     let toastTimer;
@@ -489,17 +618,19 @@
         }
         achBusy = true;
         const a = achQueue.shift();
+        const signin = !!a.signin;
         const bar = achEl.querySelector('.ach-bar');
         const orb = achEl.querySelector('.ach-orb');
         const text = achEl.querySelector('.ach-text');
         const [l1, l2] = text.querySelectorAll('p');
-        l1.textContent = 'Achievement unlocked';
-        l2.textContent = `${a.g}G - ${a.name}`;
+        l1.textContent = signin ? `${PROFILE.tag} signed in` : 'Achievement unlocked';
+        l2.textContent = signin ? '' : `${a.g}G - ${a.name}`;
         const H = 70;
         const W = Math.ceil(text.offsetLeft + text.offsetWidth + 30);
         achEl.style.width = `${W}px`;
         achEl.classList.add('show');
-        sfx.achievement();
+        if (signin) sfx.signin();
+        else sfx.achievement();
         const out = 'cubic-bezier(.2,.8,.2,1)';
         const anims = [
             orb.animate([
@@ -538,10 +669,227 @@
                 if (held) toast(...held);
                 setTimeout(showAchievement, 350);
             });
-        }, 4800);
+        }, signin ? 3000 : 4800);
     }
 
     markPlayed(game);
+
+    // ── guide ──────────────────────────────────────────────
+    // The Xbox Guide: a panel over whatever is open, with Socials / Xbox Guide / Settings tabs.
+    const guide = { open: false, tab: 1, sel: 0, items: [] };
+    const guideEl = make('div', 'guide');
+    guideEl.setAttribute('role', 'dialog');
+    guideEl.setAttribute('aria-label', 'Xbox Guide');
+    guideEl.setAttribute('aria-hidden', 'true');
+    guideEl.innerHTML = '<div class="gd-panel"><div class="gd-head"><img class="gd-pic" alt=""><div class="gd-who"><p class="gd-tag"></p><p class="gd-score"></p></div></div>' +
+        '<div class="gd-tabs"></div><p class="gd-tab-name"></p><div class="gd-list"></div>' +
+        '<p class="gd-foot"><span><b class="pad pad-a">A</b>Select</span><span><b class="pad pad-b">B</b>Close</span></p></div>';
+    guideEl.querySelector('.gd-pic').src = PROFILE.gamerpic;
+    guideEl.querySelector('.gd-tag').textContent = PROFILE.tag;
+    guideEl.querySelector('.gd-score').innerHTML = `<span>${PROFILE.gamerscore}</span>${GCOIN}`;
+    stage.append(guideEl);
+    guideEl.addEventListener('click', (e) => {
+        if (e.target === guideEl) closeGuide();
+    });
+
+    // Opens a screen from the Guide, whether or not another screen is already up.
+    function goScreen(key) {
+        closeGuide(true);
+        openScreen(key);
+    }
+
+    function goHome() {
+        closeGuide(true);
+        if (state.screen) closeScreen();
+        const home = CHANNELS.length - 1;
+        if (state.ch !== home) gotoChannel(home, 1);
+        const f = state.focus[state.ch];
+        if (f) moveTile(-f);
+    }
+
+    const GUIDE_TABS = [
+        {
+            name: 'Socials',
+            icon: 'people',
+            items: () => Object.entries(SOCIALS).map(([key, s]) => ({
+                label: s.name,
+                icon: key,
+                value: () => statText(s),
+                run: (src) => {
+                    if (key === 'youtube' || key === 'twitch') goScreen(key);
+                    else if (s.href) openLink(s.href, src);
+                    else copyText(s.copy);
+                },
+            })),
+        },
+        {
+            name: 'Xbox Guide',
+            icon: 'home',
+            items: () => [
+                { label: 'Achievements', icon: 'trophy', value: () => `${earnedG()} / ${ACH_TOTAL}G`, run: () => goScreen('achievements') },
+                { label: 'Gamer Profile', icon: 'card', run: () => goScreen('profile') },
+                { label: 'Game Library', icon: 'disc', value: () => game.short, run: () => goScreen('library') },
+                { label: 'Geobox', icon: 'ticket', value: () => (GEOBOX.code ? `code ${GEOBOX.code}` : ''), run: () => goScreen('geobox') },
+                { label: 'Xbox Dashboard', icon: 'channels', run: goHome },
+            ],
+        },
+        { name: 'Settings', icon: 'gear', items: () => SETTINGS.map((d) => ({ ...d })) },
+    ];
+
+    function renderGuide() {
+        const tabs = guideEl.querySelector('.gd-tabs');
+        tabs.replaceChildren(...GUIDE_TABS.map((t, i) => {
+            const b = make('button', `gd-tab${i === guide.tab ? ' on' : ''}`);
+            b.type = 'button';
+            b.innerHTML = icon(t.icon, 'gd-ico');
+            b.setAttribute('aria-label', t.name);
+            b.addEventListener('click', () => guideTab(i - guide.tab));
+            return b;
+        }));
+        guideEl.querySelector('.gd-tab-name').textContent = GUIDE_TABS[guide.tab].name;
+        const list = guideEl.querySelector('.gd-list');
+        guide.items = GUIDE_TABS[guide.tab].items();
+        list.replaceChildren(...guide.items.map((it, i) => {
+            const b = make('button', 'gd-item');
+            b.type = 'button';
+            const lbl = make('span', 'lbl');
+            if (it.icon) lbl.innerHTML = icon(it.icon, 'ico');
+            lbl.append(it.label);
+            b.append(lbl, make('span', 'val', it.value ? it.value() : ''));
+            b.addEventListener('click', () => {
+                guide.sel = i;
+                paintGuideSel();
+                guideInput('a', 'pointer');
+            });
+            it.el = b;
+            return b;
+        }));
+        guide.sel = Math.min(guide.sel, guide.items.length - 1);
+        paintGuideSel();
+    }
+
+    function paintGuideSel() {
+        guide.items.forEach((it, i) => {
+            it.el.classList.toggle('sel', i === guide.sel);
+            if (it.value) it.el.lastChild.textContent = it.value();
+        });
+        const cur = guide.items[guide.sel];
+        srEl.textContent = cur ? `Guide, ${GUIDE_TABS[guide.tab].name}: ${cur.label}` : 'Guide';
+    }
+
+    function guideTab(d) {
+        if (!d) return;
+        guide.tab = (guide.tab + d + GUIDE_TABS.length) % GUIDE_TABS.length;
+        guide.sel = 0;
+        sfx.channel(d);
+        renderGuide();
+    }
+
+    function openGuide() {
+        if (guide.open) return;
+        guide.open = true;
+        guide.tab = 1;
+        guide.sel = 0;
+        renderGuide();
+        stage.classList.add('guide-open');
+        guideEl.setAttribute('aria-hidden', 'false');
+        sfx.guide();
+    }
+
+    function closeGuide(quiet) {
+        if (!guide.open) return;
+        guide.open = false;
+        stage.classList.remove('guide-open');
+        guideEl.setAttribute('aria-hidden', 'true');
+        if (!quiet) sfx.back();
+        announce();
+    }
+
+    function guideInput(action, src) {
+        const cur = guide.items[guide.sel];
+        switch (action) {
+            case 'up':
+            case 'down': {
+                const next = guide.sel + (action === 'down' ? 1 : -1);
+                if (next < 0 || next >= guide.items.length) {
+                    sfx.bump();
+                    return;
+                }
+                guide.sel = next;
+                sfx.move();
+                paintGuideSel();
+                break;
+            }
+            case 'left':
+            case 'right': {
+                const d = action === 'right' ? 1 : -1;
+                if (cur && cur.cycle) {
+                    cur.cycle(d);
+                    sfx.move();
+                    paintGuideSel();
+                } else {
+                    guideTab(d);
+                }
+                break;
+            }
+            case 'a':
+                if (!cur) return;
+                sfx.select();
+                cur.run(src);
+                if (guide.open) paintGuideSel();
+                break;
+            case 'b':
+            case 'guide':
+                closeGuide();
+                break;
+        }
+    }
+
+    // ── red ring of death ──────────────────────────────────
+    // Hold Eject on the disc tile for three seconds: the dashboard freezes, the console's ring shows three
+    // red lights, then it "reboots" and a secret achievement pops.
+    let rrodTimer = 0;
+    let rebooting = false;
+    function holdEject(on) {
+        clearTimeout(rrodTimer);
+        if (on && !booting && !state.screen && !guide.open && currentTile() === discTile) rrodTimer = setTimeout(redRing, 3000);
+    }
+
+    const RING = (() => {
+        const seg = (a0, a1, cls) => {
+            const pt = (r, a) => `${(50 + r * Math.cos(a * Math.PI / 180)).toFixed(2)} ${(50 + r * Math.sin(a * Math.PI / 180)).toFixed(2)}`;
+            return `<path class="${cls}"${cls === 'red' ? ' filter="url(#rr-glow)"' : ''} d="M${pt(46, a0)}A46 46 0 0 1 ${pt(46, a1)}L${pt(36, a1)}A36 36 0 0 0 ${pt(36, a0)}Z"/>`;
+        };
+        return '<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="rr-btn" cx="40%" cy="32%" r="75%"><stop offset="0" stop-color="#f4f4f4"/><stop offset=".55" stop-color="#b9b9b9"/><stop offset="1" stop-color="#6c6c6c"/></radialGradient>' +
+            '<filter id="rr-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
+            '<circle cx="50" cy="50" r="49" fill="#111"/>' + seg(187, 263, 'off') + seg(277, 353, 'red') + seg(7, 83, 'red') + seg(97, 173, 'red') +
+            '<circle cx="50" cy="50" r="31" fill="#090909"/><circle cx="50" cy="50" r="28.5" fill="url(#rr-btn)"/>' +
+            '<path d="M50 36v13M41.5 41.5a12 12 0 1 0 17 0" fill="none" stroke="#5a5a5a" stroke-width="3.6" stroke-linecap="round"/></svg>';
+    })();
+
+    function redRing() {
+        if (booting || document.querySelector('.rrod')) return;
+        closeGuide(true);
+        song.pause();
+        sfx.crash();
+        stage.classList.add('crash');
+        setTimeout(() => {
+            stage.classList.remove('crash');
+            const el = make('div', 'rrod');
+            el.setAttribute('role', 'alert');
+            el.innerHTML = `<div class="rr-ring">${RING}</div><p class="rr-msg">General hardware failure</p><p class="rr-sub">Please contact Xbox Support.</p>`;
+            document.body.append(el);
+            setTimeout(() => { el.querySelector('.rr-sub').textContent = '...just kidding.'; }, 3600);
+            setTimeout(() => {
+                el.classList.add('out');
+                setTimeout(() => el.remove(), 700);
+                rebooting = true;
+                document.body.dataset.crashed = '1';
+                showBoot();
+                bootPress();
+            }, 5400);
+        }, 900);
+    }
 
     // ── live numbers from data/stats.json ──────────────────
     let latest = null;
@@ -575,6 +923,10 @@
             b.type = 'button';
             b.append(make('b', `pad pad-${btn}`, btn.toUpperCase()), document.createTextNode(label));
             b.addEventListener('click', () => input(btn, 'pointer'));
+            if (btn === 'x') {
+                b.addEventListener('pointerdown', () => holdEject(true));
+                ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => b.addEventListener(type, () => holdEject(false)));
+            }
             return b;
         }));
     }
@@ -1351,26 +1703,43 @@
         });
     }
 
+    // Shared by System Settings and the Guide: label, current value, and what A / left-right do.
+    const onOff = (v) => (v ? 'On' : 'Off');
+    function toggleSetting(key) {
+        unlock('settings');
+        if (key === 'sound') {
+            toggleSound();
+            return;
+        }
+        setSetting(key, !settings[key]);
+        if (key === 'music') {
+            if (settings.music) startMusic(true);
+            else song.pause();
+        }
+    }
+    const SETTINGS = [
+        { label: 'Sound Effects', value: () => onOff(settings.sound), run: () => toggleSetting('sound') },
+        { label: 'Background Music', value: () => onOff(settings.music), run: () => toggleSetting('music') },
+        { label: 'Background Motion', value: () => onOff(settings.motion), run: () => toggleSetting('motion') },
+        { label: 'Theme', value: () => theme.name, run: () => cycleTheme(1), cycle: (d) => cycleTheme(d) },
+    ];
+
     function renderSettings(body) {
         const list = make('div', 'list wide');
         body.append(list);
-        const toggle = (label, key) => {
-            const entry = item(list, label, () => {
-                unlock('settings');
-                if (key === 'sound') {
-                    toggleSound();
-                    return;
-                }
-                setSetting(key, !settings[key]);
-                entry.el.lastChild.textContent = settings[key] ? 'On' : 'Off';
-                if (key === 'music') {
-                    if (settings.music) startMusic(true);
-                    else song.pause();
-                }
-            }, settings[key] ? 'On' : 'Off');
+        return SETTINGS.map((def) => {
+            const entry = item(list, def.label, () => {
+                def.run();
+                entry.el.lastChild.textContent = def.value();
+            }, def.value());
+            if (def.cycle) {
+                entry.cycle = (d) => {
+                    def.cycle(d);
+                    entry.el.lastChild.textContent = def.value();
+                };
+            }
             return entry;
-        };
-        return [toggle('Sound Effects', 'sound'), toggle('Background Music', 'music'), toggle('Background Motion', 'motion')];
+        });
     }
 
     function highlight() {
@@ -1409,6 +1778,16 @@
         if (VIDEO_SCREENS.has(key) && !song.paused) {
             song.pause();
             musicHeld = true;
+        }
+        if (state.screen) {
+            gbxStop();
+            gbx.items = null;
+            clearTimeout(tunedTimer);
+            screenEl.querySelectorAll('iframe').forEach((f) => f.remove());
+            if (musicHeld && !VIDEO_SCREENS.has(key)) {
+                musicHeld = false;
+                if (settings.music) song.play().catch(() => {});
+            }
         }
         state.screen = key;
         state.sel = 0;
@@ -1469,6 +1848,14 @@
             if (src !== 'wheel') bootPress();
             return;
         }
+        if (guide.open) {
+            guideInput(action, src);
+            return;
+        }
+        if (action === 'guide') {
+            openGuide();
+            return;
+        }
         konami.push(action);
         if (konami.length > KONAMI.length) konami.shift();
         if (konami.join() === KONAMI.join()) unlock('konami');
@@ -1506,6 +1893,7 @@
     const KEYS = {
         ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
         Enter: 'a', ' ': 'a', Escape: 'b', Backspace: 'b', a: 'a', A: 'a', b: 'b', B: 'b', x: 'x', X: 'x', y: 'y', Y: 'y',
+        Home: 'guide', g: 'guide', G: 'guide',
     };
     let lastMove = 0;
     addEventListener('keydown', (e) => {
@@ -1518,6 +1906,7 @@
         wakeAvatar();
         const isDir = action === 'left' || action === 'right' || action === 'up' || action === 'down';
         if (e.repeat && !isDir) return;
+        if (action === 'x') holdEject(true);
         if (isDir) {
             const now = performance.now();
             const gap = action === 'up' || action === 'down' ? (e.repeat ? 280 : 60) : (e.repeat ? 120 : 40);
@@ -1525,6 +1914,10 @@
             lastMove = now;
         }
         input(action, 'key');
+    });
+
+    addEventListener('keyup', (e) => {
+        if (KEYS[e.key] === 'x') holdEject(false);
     });
 
     ['pointerdown', 'pointerup', 'touchend'].forEach((type) => addEventListener(type, () => {
@@ -1584,6 +1977,7 @@
             b: btn(1),
             x: btn(2),
             y: btn(3),
+            guide: btn(16) || btn(8),
         };
         for (const key of Object.keys(held)) {
             const on = held[key];
@@ -1596,10 +1990,16 @@
                 input(key, 'pad');
                 pad.next[key] = now + (vertical ? 300 : 140);
             }
+            if (key === 'x' && on !== !!pad.prev.x) holdEject(on);
             pad.prev[key] = on;
         }
     }
     addEventListener('gamepadconnected', () => toast('Controller connected'));
+    const orbEl = $('#orb');
+    orbEl.setAttribute('role', 'button');
+    orbEl.setAttribute('aria-label', 'Open the Guide');
+    orbEl.removeAttribute('aria-hidden');
+    orbEl.addEventListener('click', () => input('guide', 'pointer'));
 
     // ── background ─────────────────────────────────────────
     const canvas = $('#bg');
@@ -1680,12 +2080,12 @@
         c.setTransform(...m);
         const sky = c.createLinearGradient(0, -120, 0, 440);
         [[0, '#264203'], [0.2, '#44700c'], [0.42, '#6b9a20'], [0.66, '#a3bf78'], [0.82, '#d3e2c3'], [0.9, '#ecf2ea'], [1, '#f3f6f2']]
-            .forEach(([o, col]) => sky.addColorStop(o, col));
+            .forEach(([o, col]) => sky.addColorStop(o, tc(col)));
         c.fillStyle = sky;
         c.fillRect(x0, y0, x1 - x0, y1 - y0);
         const haze = c.createRadialGradient(820, 150, 0, 820, 150, 620);
-        haze.addColorStop(0, 'rgba(206,216,196,.55)');
-        haze.addColorStop(1, 'rgba(206,216,196,0)');
+        haze.addColorStop(0, tc('rgba(206,216,196,.55)'));
+        haze.addColorStop(1, tc('rgba(206,216,196,0)'));
         c.fillStyle = haze;
         c.fillRect(x0, y0, x1 - x0, y1 - y0);
 
@@ -1704,8 +2104,8 @@
         c = frontC.getContext('2d');
         c.setTransform(...m);
         const vig = c.createRadialGradient(640, 330, 260, 640, 330, 1050);
-        vig.addColorStop(0, 'rgba(10,25,0,0)');
-        vig.addColorStop(1, 'rgba(10,25,0,.6)');
+        vig.addColorStop(0, tc('rgba(10,25,0,0)'));
+        vig.addColorStop(1, tc('rgba(10,25,0,.6)'));
         c.fillStyle = vig;
         c.fillRect(x0, y0, x1 - x0, y1 - y0);
 
@@ -1806,6 +2206,7 @@
     $('.tr-pic').src = PROFILE.gamerpic;
     resize();
     layoutChannels(false);
+    if (theme.hue) applyTheme(theme);
     row = buildRow(state.ch);
     row.el.classList.add('no-anim');
     layoutRow(false);
@@ -1828,9 +2229,10 @@
         bootEl.setAttribute('role', 'dialog');
         bootEl.setAttribute('aria-label', 'Press any button to start');
         bootEl.innerHTML = '<div class="boot-stage"><span class="boot-ring r1"></span><span class="boot-ring r2"></span>' +
-            '<span class="boot-ring r3"></span><span class="boot-flash"></span><img class="boot-orb" src="assets/logo.webp" alt="" draggable="false"><p class="boot-name"></p></div>' +
+            '<span class="boot-ring r3"></span><span class="boot-flash"></span><img class="boot-orb" alt="" draggable="false"><p class="boot-name"></p></div>' +
             '<p class="boot-prompt"><b class="pad pad-a">A</b>Press any button to start</p>';
         bootEl.querySelector('.boot-name').textContent = PROFILE.tag;
+        bootEl.querySelector('.boot-orb').src = theme.logo || 'assets/logo.webp';
         bootEl.addEventListener('click', bootPress);
         document.body.append(bootEl);
     }
@@ -1858,8 +2260,14 @@
         setTimeout(() => el.remove(), 700);
         intro();
         if (live.on && !live.announced) announceLive();
+        if (rebooting) {
+            rebooting = false;
+            if (settings.music) song.play().catch(() => {});
+        }
         setTimeout(() => {
+            achQueue.unshift({ signin: true });
             unlock('boot');
+            if (achStore.boot && !achStore.rrod && document.body.dataset.crashed) unlock('rrod');
             if (new Date().getHours() < 5) unlock('night');
             showAchievement();
         }, 1100);

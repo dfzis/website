@@ -628,8 +628,10 @@ button:focus-visible { outline: none; }
 
 #orb {
     position: absolute;
-    left: 1133px;
-    top: 608px;
+    left: calc(var(--view-r, 1280px) - 147px);
+    top: calc(var(--view-b, 720px) - 112px);
+    cursor: pointer;
+    transition: filter .15s ease, transform .15s ease;
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -1235,7 +1237,10 @@ button:focus-visible { outline: none; }
 .item.has-link .val::after { content: " ↗"; }
 
 /* ── phones (portrait) ──────────────────────────────────── */
-.portrait #orb { display: none; }
+.portrait #orb {
+    left: calc(var(--view-r, 1280px) - 72px);
+    top: calc(var(--view-b, 720px) - 94px);
+}
 .portrait #toast { min-width: 0; max-width: calc(var(--view-r, 1280px) - 48px); }
 .portrait .body > .list,
 .portrait .body > .panel { transform-origin: 0 0; }
@@ -1247,3 +1252,137 @@ button:focus-visible { outline: none; }
 /* on phones the legend spans the width, so pop-ups sit above it */
 .portrait .ach { top: calc(var(--view-b, 720px) - 172px); }
 .portrait #toast { top: calc(var(--view-b, 720px) - 160px); }
+.ach-text p:empty { display: none; }
+#orb:hover { filter: brightness(1.12); }
+#orb:active { transform: scale(.94); }
+
+/* ── guide ───────────────────────────────────────────────── */
+/* oversized so the dimming also covers the letterbox on wide screens */
+.guide {
+    position: absolute;
+    inset: -1200px;
+    z-index: 60;
+    background: rgba(0, 0, 0, .45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .22s ease, visibility 0s linear .25s;
+}
+.guide-open .guide {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .2s ease;
+}
+.gd-panel {
+    position: absolute;
+    left: calc(1200px + var(--m, 96px));
+    top: 1264px;
+    width: min(500px, calc(var(--view-r, 1280px) - var(--m, 96px) - 24px));
+    max-height: calc(var(--view-b, 720px) - 96px);
+    padding: 20px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(78, 82, 86, .97), rgba(38, 41, 44, .97) 38%, rgba(20, 22, 24, .97));
+    border: 1px solid rgba(255, 255, 255, .28);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .25);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+    transform: translateX(-40px) scale(.97);
+    transform-origin: left center;
+    transition: transform .3s var(--ease);
+}
+.guide-open .gd-panel { transform: none; }
+.gd-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 4px;
+}
+.gd-pic {
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    border: 2px solid #fff;
+    object-fit: cover;
+}
+.gd-tag { font-size: 24px; font-weight: 600; line-height: 1.15; }
+.gd-score { display: flex; align-items: center; gap: 6px; font-size: 18px; opacity: .85; }
+.gd-tabs { display: flex; gap: 8px; }
+.gd-tab {
+    flex: 1;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .14);
+}
+.gd-tab.on {
+    background: var(--lime);
+    border-color: rgba(255, 255, 220, .8);
+    box-shadow: 0 0 12px rgba(200, 255, 80, .35);
+}
+.gd-ico { width: 24px; height: 24px; fill: #fff; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .4)); }
+.gd-tab-name { font-size: 18px; opacity: .8; }
+.gd-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+}
+.gd-item {
+    flex-shrink: 0;
+    height: 48px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-radius: 5px;
+    font-size: 20px;
+    text-align: left;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .1);
+}
+.gd-item .val { font-size: 16px; }
+.gd-item.sel {
+    background: var(--lime);
+    border-color: rgba(255, 255, 220, .85);
+    box-shadow: 0 0 14px rgba(200, 255, 80, .4);
+}
+.gd-foot { display: flex; gap: 22px; font-size: 17px; opacity: .9; }
+.gd-foot span { display: flex; align-items: center; gap: 8px; }
+
+/* ── red ring of death ──────────────────────────────────── */
+.crash {
+    animation: crash-jitter .09s steps(2) infinite;
+    filter: contrast(1.4) saturate(1.6);
+}
+@keyframes crash-jitter {
+    0% { translate: 0 0; }
+    50% { translate: 3px -2px; }
+    100% { translate: -2px 1px; }
+}
+.rrod {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #000;
+    font-family: var(--font);
+    color: #8d8d8d;
+    text-align: center;
+    transition: opacity .6s ease;
+}
+.rrod.out { opacity: 0; }
+.rr-ring { width: min(34vmin, 220px); aspect-ratio: 1; margin-bottom: 22px; }
+.rr-ring svg { display: block; width: 100%; height: 100%; }
+.rr-ring .off { fill: #262626; }
+.rr-ring .red { fill: #ff2b1c; animation: rr-blink 1s steps(1) infinite; }
+@keyframes rr-blink { 50% { fill: #3c0c07; } }
+.rr-msg { font-size: clamp(16px, 2.6vmin, 24px); color: #d2d2d2; }
+.rr-sub { font-size: clamp(13px, 2vmin, 18px); }

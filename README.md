@@ -9,7 +9,11 @@ hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are serve
 - controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions. the phone/browser back gesture closes an open screen
 - phones: portrait shows the left of the dashboard at full height; screens stack their panel over the menu (menus scroll) and pop-ups stay in view. the WebGL avatar is never fully hidden (opacity .001) because rebuilding its layer stalled phones long enough to swallow the slide animations
 - reduced motion: only the background drift and pulsing glows stop; navigation transitions stay
-- boot screen: plays every time the page opens (press any button, then the startup swirl and chime; pressing again skips it)
+- boot screen: plays every time the page opens (press any button, then the startup swirl and chime; pressing again skips it), then the "mewzah signed in" toast
+- guide: the orb (bottom right), Home / G, or the controller's Xbox / View button opens the Xbox Guide with socials, shortcuts (achievements, profile, game library, geobox, dashboard) and settings
+- themes: system settings / guide → theme recolours the site's greens at runtime (`THEMES` in `app.js`: green, blue, purple, orange), saved per browser; each theme has a boot logo in `assets/logo-<theme>.webp`
+- easter egg: hold eject (X) on the disc tile for three seconds
+- `404.html`: a 360-style "content unavailable" page for broken links, in the visitor's theme
 - socials: youtube and twitch open in-dashboard preview screens (latest uploads / live stream); the youtube screen uses the channel's videos-only playlist (`UULF…`, no shorts or streams) set in `SOCIALS` in `app.js`
 - avatar: a 60fps idle loop recorded from the [360sona](https://360sona.com) avatar. `assets/avatar.mp4` (webm fallback) holds colour on the left half and transparency on the right, recombined in the browser with webgl; `assets/avatar.webp` is its first frame and shows instantly
 - images: `assets/gamerpic.png` (gamer picture); per game in `GAMES`: tile art (`assets/cod4.jpg`, `mw2.jpg`, `halo3.jpg`) and disc photos cut out to circles centred on the hub (`assets/disc-*.webp`)
