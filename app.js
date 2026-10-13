@@ -118,12 +118,13 @@
     };
 
     const CHANNELS = [
+        ...(CONTACT.email ? [{
+            name: 'Contact',
+            tiles: [{ label: 'Business Email', icon: 'mail', screen: 'messages' }],
+        }] : []),
         {
             name: 'Friends',
-            tiles: [
-                { kind: 'geobox', label: 'Geobox', screen: 'geobox' },
-                ...(CONTACT.email ? [{ label: 'Messages', icon: 'mail', screen: 'messages' }] : []),
-            ],
+            tiles: [{ kind: 'geobox', label: 'Geobox', screen: 'geobox' }],
         },
         {
             name: 'Socials',
@@ -733,7 +734,7 @@
                 { label: 'Gamer Profile', icon: 'card', run: () => goScreen('profile') },
                 { label: 'Game Library', icon: 'disc', value: () => game.short, run: () => goScreen('library') },
                 { label: 'Geobox', icon: 'ticket', value: () => (GEOBOX.code ? `code ${GEOBOX.code}` : ''), run: () => goScreen('geobox') },
-                ...(CONTACT.email ? [{ label: 'Messages', icon: 'mail', value: () => 'Business', run: () => goScreen('messages') }] : []),
+                ...(CONTACT.email ? [{ label: 'Contact', icon: 'mail', value: () => 'Business email', run: () => goScreen('messages') }] : []),
                 { label: 'Xbox Dashboard', icon: 'channels', run: goHome },
             ],
         },
@@ -1362,7 +1363,7 @@
         game: { title: 'Game Details', render: renderGame },
         library: { title: 'Game Library', render: renderLibrary },
         achievements: { title: 'Achievements', render: renderAchievements },
-        messages: { title: 'Messages', render: renderMessages },
+        messages: { title: 'Business Email', render: renderMessages },
         setup: { title: 'My Setup', render: renderSetup },
         geobox: { title: 'Geobox', render: renderGeobox },
         settings: { title: 'System Settings', render: renderSettings },

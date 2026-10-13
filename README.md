@@ -5,7 +5,7 @@ mewzah's personal site: an xbox 360 nxe-style dashboard. plain html/css/js, no b
 hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are served as-is). © mewzah, all rights reserved.
 
 - content (profile, gamerscore, socials and follower counts, games, channels): top of `app.js`
-- channels: friends (geobox, messages with the business email from `CONTACT` in `app.js`), socials (youtube, twitch, tiktok, x, discord), my xbox (disc, gamer profile, game library, my setup once `SETUP` has items, system settings)
+- channels: contact (the business email from `CONTACT` in `app.js`), friends (geobox), socials (youtube, twitch, tiktok, x, discord), my xbox (disc, gamer profile, game library, my setup once `SETUP` has items, system settings)
 - controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions. the phone/browser back gesture closes an open screen
 - phones: portrait shows the left of the dashboard at full height; screens stack their panel over the menu (menus scroll) and pop-ups stay in view. the WebGL avatar is never fully hidden (opacity .001) because rebuilding its layer stalled phones long enough to swallow the slide animations
 - reduced motion: only the background drift and pulsing glows stop; navigation transitions stay
