@@ -33,8 +33,9 @@
         modes: ['Resurgence Quads', 'Resurgence Duos', 'Battle Royale Quads', 'Resurgence Casuals', 'Black Ops Royale'],
     };
 
-    // Business contact on a Messages tile in Friends (null hides the tile).
-    const CONTACT = { email: null };
+    // Business contact on a Messages tile in Friends (null hides the tile). Joined at runtime so the
+    // address never appears whole in the page source for spam scrapers.
+    const CONTACT = { email: ['business', 'mewzah.tv'].join('@') };
 
     // My Setup screen in My Xbox, e.g. { label: 'Controller', item: 'SCUF Reflex Pro', href: 'https://…' } (empty hides the tile).
     const SETUP = [];
@@ -732,6 +733,7 @@
                 { label: 'Gamer Profile', icon: 'card', run: () => goScreen('profile') },
                 { label: 'Game Library', icon: 'disc', value: () => game.short, run: () => goScreen('library') },
                 { label: 'Geobox', icon: 'ticket', value: () => (GEOBOX.code ? `code ${GEOBOX.code}` : ''), run: () => goScreen('geobox') },
+                ...(CONTACT.email ? [{ label: 'Messages', icon: 'mail', value: () => 'Business', run: () => goScreen('messages') }] : []),
                 { label: 'Xbox Dashboard', icon: 'channels', run: goHome },
             ],
         },
