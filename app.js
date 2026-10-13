@@ -12,7 +12,7 @@
     const SOCIALS = {
         youtube: { name: 'YouTube', handle: '@mewzah', href: 'https://www.youtube.com/@mewzah', count: 32400, unit: 'subscribers', uploads: 'UULFEPXFafBx8AEAU7EnARmSnw' },
         twitch: { name: 'Twitch', handle: 'mewzah', href: 'https://www.twitch.tv/mewzah', count: 4400, unit: 'followers' },
-        tiktok: { name: 'TikTok', handle: 'new account', href: 'https://www.tiktok.com/@mewzah', count: null, unit: 'followers' },
+        tiktok: { name: 'TikTok', handle: '@mewz6h', href: 'https://www.tiktok.com/@mewz6h', count: null, unit: 'followers' },
         x: { name: 'X', handle: '@mewzah1', href: 'https://x.com/mewzah1', count: 1600, unit: 'followers' },
         discord: { name: 'Discord', handle: 'mewzah', copy: 'mewzah' },
     };
