@@ -1401,3 +1401,29 @@ button:focus-visible { outline: none; }
     pointer-events: auto;
     cursor: pointer;
 }
+
+/* ── mouse tip: a two-line toast with a controller ───────── */
+/* wider than a normal toast, so it sits just above the button legend */
+#toast.tip {
+    top: calc(var(--view-b, 720px) - 154px);
+    height: auto;
+    min-height: 58px;
+    padding: 8px 26px 8px 16px;
+    gap: 16px;
+}
+#toast.tip i {
+    flex-shrink: 0;
+    width: 52px;
+    height: 36px;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .45));
+}
+#toast.tip svg { display: block; width: 100%; height: 100%; }
+#toast .pad-guide { fill: #8fd626; }
+#toast.tip span { display: flex; flex-direction: column; gap: 2px; }
+#toast small { font-size: 16px; opacity: .78; }
+/* phones keep it below the tiles, at a size that fits the narrower view */
+.portrait #toast.tip { top: calc(var(--view-b, 720px) - 160px); font-size: 17px; }
+.portrait #toast.tip small { font-size: 14px; }

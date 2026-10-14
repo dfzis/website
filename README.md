@@ -6,7 +6,7 @@ hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are serve
 
 - content (profile, gamerscore, socials and follower counts, games, channels): top of `app.js`
 - channels: contact (the business email from `CONTACT` in `app.js`), friends (geobox), socials (youtube, twitch, tiktok, x, discord), my xbox (disc, gamer profile, game library, my setup once `SETUP` has items, system settings)
-- controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions. the phone/browser back gesture closes an open screen
+- controls: arrows / d-pad / swipe to move, enter / A to select, esc / B to go back, X / Y for tile actions. the phone/browser back gesture closes an open screen. the first mouse click (not touch) shows a one-time tip pointing at the keys or a controller, after sign-in; anyone who has already used the keys or a pad never sees it
 - phones: portrait shows the left of the dashboard at full height; screens stack their panel over the menu (menus scroll) and pop-ups stay in view. the WebGL avatar is never fully hidden (opacity .001) because rebuilding its layer stalled phones long enough to swallow the slide animations
 - reduced motion: only the background drift and pulsing glows stop; navigation transitions stay
 - boot screen: plays every time the page opens (press any button, then the startup swirl and chime; pressing again skips it), then the "mewzah signed in" toast

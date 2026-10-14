@@ -485,18 +485,34 @@
     let toastTimer;
     let toastUntil = 0;
     const heldToasts = [];
-    function toast(msg, quiet) {
+    function toast(msg, quiet, opts = {}) {
         if (achBusy) {
-            heldToasts.push([msg, quiet]);
+            heldToasts.push([msg, quiet, opts]);
             return;
         }
-        toastUntil = performance.now() + 2600;
-        toastEl.querySelector('span').textContent = msg;
+        const ms = opts.ms || 2600;
+        toastUntil = performance.now() + ms;
+        const span = toastEl.querySelector('span');
+        span.textContent = msg;
+        if (opts.sub) span.append(make('small', '', opts.sub));
+        toastEl.querySelector('i').innerHTML = opts.icon || '';
+        toastEl.classList.toggle('tip', !!opts.icon);
         toastEl.classList.add('show');
         if (!quiet) sfx.notify();
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms);
     }
+
+    // A white 360 pad: the guide button follows the theme, the face buttons keep their real colours.
+    const PAD_ICON = '<svg viewBox="0 0 64 44" aria-hidden="true"><defs>' +
+        '<linearGradient id="pad-shell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#d9dcdf"/><stop offset="1" stop-color="#8e9398"/></linearGradient></defs>' +
+        '<path fill="url(#pad-shell)" stroke="rgba(0,0,0,.35)" d="M15 5.5C21 3 27 4 32 5c5-1 11-2 17 .5 6 2.6 10 11.5 12.4 23.5 1.4 7.5-2.4 12.4-7.3 10.6-3.8-1.4-6.4-6-9.1-9.6H19c-2.7 3.6-5.3 8.2-9.1 9.6C5 41.4 1.2 36.5 2.6 29 5 17 9 8.1 15 5.5Z"/>' +
+        '<circle cx="17.5" cy="15" r="5" fill="#3a3d40"/><circle cx="17.5" cy="15" r="3.2" fill="#55595d"/>' +
+        '<path fill="#3a3d40" d="M23.6 20h3v3.2h3.2v3h-3.2v3.2h-3v-3.2h-3.2v-3h3.2Z"/>' +
+        '<circle cx="39.5" cy="24.5" r="4.6" fill="#3a3d40"/><circle cx="39.5" cy="24.5" r="2.9" fill="#55595d"/>' +
+        '<circle class="pad-guide" cx="32" cy="12" r="3.6"/>' +
+        '<circle cx="47" cy="9.8" r="2.5" fill="#e8b10f"/><circle cx="42.6" cy="14.2" r="2.5" fill="#2a7fe0"/>' +
+        '<circle cx="51.4" cy="14.2" r="2.5" fill="#d8352a"/><circle cx="47" cy="18.6" r="2.5" fill="#5aa818"/></svg>';
 
     function copyText(text, what = 'Discord username') {
         if (what === 'Discord username') sawSocial('discord');
@@ -556,6 +572,7 @@
     const earnedG = () => ACHIEVEMENTS.reduce((t, a) => t + (achStore[a.id] ? a.g : 0), 0);
     const achQueue = [];
     let achBusy = false;
+    let signedIn = false;
     let tunedTimer = 0;
     const KONAMI = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
     const konami = [];
@@ -623,6 +640,7 @@
         achBusy = true;
         const a = achQueue.shift();
         const signin = !!a.signin;
+        if (signin) signedIn = true;
         const bar = achEl.querySelector('.ach-bar');
         const orb = achEl.querySelector('.ach-orb');
         const text = achEl.querySelector('.ach-text');
@@ -672,11 +690,36 @@
                 heldToasts.length = 0;
                 if (held) toast(...held);
                 setTimeout(showAchievement, 350);
+                if (hintWanted && !achQueue.length) setTimeout(mouseHint, 900);
             });
         }, signin ? 3000 : 4800);
     }
 
     markPlayed(game);
+
+    // Mouse visitors get one nudge (ever) toward the keys or a controller, after sign-in and any achievements.
+    let hintDone = readJSON('mz.hint', false);
+    let hintWanted = false;
+    function mouseHint() {
+        if (hintDone || booting || !signedIn || achBusy || achQueue.length) return;
+        const wait = toastUntil - performance.now();
+        if (wait > 0) {
+            setTimeout(mouseHint, wait + 400);
+            return;
+        }
+        hintDone = true;
+        saveJSON('mz.hint', true);
+        toast('Best played with a controller or the arrow keys', false, {
+            icon: PAD_ICON,
+            sub: 'Arrows to move · Enter to select · Esc to go back',
+            ms: 6500,
+        });
+    }
+    addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse' || hintDone || hintWanted) return;
+        hintWanted = true;
+        setTimeout(mouseHint, 900);
+    }, { passive: true });
 
     // ── guide ──────────────────────────────────────────────
     // The Xbox Guide: a panel over whatever is open, with Socials / Xbox Guide / Settings tabs.
@@ -1902,6 +1945,7 @@
 
     // ── input ──────────────────────────────────────────────
     function input(action, src) {
+        if (src === 'key' || src === 'pad') hintDone = true;
         if (booting) {
             if (src !== 'wheel') bootPress();
             return;
