@@ -47,6 +47,7 @@
         { id: 'blue', name: 'Blue', hue: 195, logo: 'assets/logo-blue.webp' },
         { id: 'purple', name: 'Purple', hue: 272, lift: 0.3, logo: 'assets/logo-purple.webp' },
         { id: 'orange', name: 'Orange', hue: 26, logo: 'assets/logo-orange.webp' },
+        { id: 'halloween', name: 'Halloween', hue: 26, lift: 0.6, season: 'halloween', logo: 'assets/logo-orange.webp' },
     ];
 
     // YouTube subscribers and latest upload, refreshed every few hours by .github/workflows/stats.yml.
@@ -2312,6 +2313,162 @@
     const frontC = layer();
     let sprites = [];
 
+    // ── seasonal looks ─────────────────────────────────────
+    // A theme with a `season` also repaints the sky and floor and drifts scenery over the background.
+    // They are picked by hand in the theme setting and added in the month they belong to; nothing switches by date.
+    const SEASONS = {
+        halloween: {
+            sky: [[0, '#12031f'], [0.2, '#2d0b4e'], [0.42, '#6a1f6e'], [0.66, '#d4561f'], [0.82, '#f59a3c'], [0.9, '#ffd79a'], [1, '#fff0d4']],
+            haze: 'rgba(255,170,70,.5)', haze0: 'rgba(255,170,70,0)',
+            floor: [[0, '#e9dccf'], [0.16, '#b9a79a'], [0.42, '#7b6a66'], [0.75, '#4b3f48'], [1, '#2c2433']],
+            vig: 'rgba(14,0,24,.62)', vig0: 'rgba(14,0,24,0)',
+            bokeh: '255,170,70',
+        },
+    };
+    const seasonNow = () => SEASONS[theme.season];
+    const between = (a, b) => a + Math.random() * (b - a);
+    const scenery = {};
+    let emberSprite = null;
+
+    // Painted once per resize into the back layer (stage coordinates).
+    function paintSeasonStatic(c, x0, y0) {
+        if (theme.season !== 'halloween') return;
+        const [mx, my, mr] = view.portrait ? [250, 62, 40] : [900, 150, 62];
+        const mg = c.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 4.2);
+        mg.addColorStop(0, 'rgba(255,230,170,.5)');
+        mg.addColorStop(1, 'rgba(255,230,170,0)');
+        c.fillStyle = mg;
+        c.fillRect(mx - mr * 4.2, my - mr * 4.2, mr * 8.4, mr * 8.4);
+        const disc = c.createRadialGradient(mx - mr * 0.2, my - mr * 0.2, mr * 0.06, mx, my, mr);
+        disc.addColorStop(0, '#fffbe6');
+        disc.addColorStop(1, '#f1d48e');
+        c.fillStyle = disc;
+        c.beginPath();
+        c.arc(mx, my, mr, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = 'rgba(190,150,80,.28)';
+        [[-0.32, -0.29, 0.18], [0.29, 0.26, 0.13], [-0.06, 0.42, 0.1], [0.4, -0.35, 0.08]].forEach(([dx, dy, r]) => {
+            c.beginPath();
+            c.arc(mx + dx * mr, my + dy * mr, r * mr, 0, Math.PI * 2);
+            c.fill();
+        });
+        // cobweb in the top-left corner
+        c.strokeStyle = 'rgba(255,255,255,.3)';
+        c.lineWidth = 1.2;
+        const L = view.portrait ? 120 : 190;
+        const rays = [0, 15, 32, 50, 68, 90].map((d) => (d * Math.PI) / 180);
+        rays.forEach((a) => {
+            c.beginPath();
+            c.moveTo(x0, y0);
+            c.lineTo(x0 + Math.cos(a) * L, y0 + Math.sin(a) * L);
+            c.stroke();
+        });
+        for (let ring = 1; ring <= 5; ring++) {
+            const r = (ring / 5) * L;
+            c.beginPath();
+            rays.forEach((a, i) => {
+                const px = x0 + Math.cos(a) * r, py = y0 + Math.sin(a) * r;
+                if (!i) c.moveTo(px, py);
+                else {
+                    const m = (rays[i - 1] + a) / 2;
+                    c.quadraticCurveTo(x0 + Math.cos(m) * r * 0.82, y0 + Math.sin(m) * r * 0.82, px, py);
+                }
+            });
+            c.stroke();
+        }
+    }
+
+    // Per frame, over the floor: rising embers, bats crossing the sky and a spider on a thread.
+    function drawSeasonFx() {
+        if (theme.season !== 'halloween') return;
+        const x0 = -OX / S, x1 = (W - OX) / S, y0 = -OY / S, y1 = (H - OY) / S;
+        const w = x1 - x0, h = y1 - y0;
+        g.setTransform(DPR * S, 0, 0, DPR * S, DPR * OX, DPR * OY);
+        if (!emberSprite) {
+            emberSprite = layer();
+            emberSprite.width = emberSprite.height = 48;
+            const x = emberSprite.getContext('2d');
+            const gr = x.createRadialGradient(24, 24, 0, 24, 24, 24);
+            gr.addColorStop(0, 'rgba(255,150,40,1)');
+            gr.addColorStop(0.35, 'rgba(255,150,40,.45)');
+            gr.addColorStop(1, 'rgba(255,150,40,0)');
+            x.fillStyle = gr;
+            x.fillRect(0, 0, 48, 48);
+            scenery.embers = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), v: between(14, 40), r: between(2, 6), ph: Math.random() * 6.28, sw: between(10, 30) }));
+            scenery.bats = Array.from({ length: 10 }, (_, i) => ({ x: Math.random() * 1400, y: between(60, 300), v: between(55, 120) * (i % 3 === 2 ? -1 : 1), s: between(0.75, 1.3), ph: Math.random() * 6.28 }));
+        }
+        scenery.embers.forEach((e) => {
+            const y = y1 + 20 - (((e.y * (h + 40)) + clock * e.v) % (h + 40));
+            const x = x0 + e.x * w + Math.sin(clock * 0.8 + e.ph) * e.sw;
+            g.globalAlpha = 0.3 + 0.35 * Math.sin(clock * 3 + e.ph);
+            g.drawImage(emberSprite, x - e.r * 3, y - e.r * 3, e.r * 6, e.r * 6);
+        });
+        g.globalAlpha = 1;
+        g.fillStyle = '#0c0114';
+        scenery.bats.forEach((b) => {
+            const span = w + 340;
+            const x = (((b.x + clock * b.v) % span) + span) % span - 170 + x0;
+            const y = b.y + Math.sin(clock * 1.3 + b.ph) * 18;
+            const lift = Math.sin(clock * 11 + b.ph) * 14;
+            g.save();
+            g.translate(x, y);
+            g.scale(b.s * (b.v < 0 ? -1 : 1), b.s);
+            g.beginPath();
+            g.moveTo(3, 0);
+            g.quadraticCurveTo(12, -10 - lift * 0.6, 26, -4 - lift);
+            g.quadraticCurveTo(21, -lift * 0.3, 19, 5 - lift * 0.4);
+            g.quadraticCurveTo(14, 2, 10, 8 - lift * 0.2);
+            g.quadraticCurveTo(6, 3, 3, 6);
+            g.lineTo(-3, 6);
+            g.quadraticCurveTo(-6, 3, -10, 8 - lift * 0.2);
+            g.quadraticCurveTo(-14, 2, -19, 5 - lift * 0.4);
+            g.quadraticCurveTo(-21, -lift * 0.3, -26, -4 - lift);
+            g.quadraticCurveTo(-12, -10 - lift * 0.6, -3, 0);
+            g.closePath();
+            g.fill();
+            g.beginPath();
+            g.ellipse(0, 1, 4.5, 6, 0, 0, Math.PI * 2);
+            g.fill();
+            g.beginPath();
+            g.moveTo(-4, -3);
+            g.lineTo(-3, -10);
+            g.lineTo(0, -5);
+            g.lineTo(3, -10);
+            g.lineTo(4, -3);
+            g.fill();
+            g.restore();
+        });
+        const sx = (view.portrait ? 330 : 700) + Math.sin(clock * 0.45) * 6;
+        const sy = y0 + (view.portrait ? 34 : 110) + Math.sin(clock * 0.6) * (view.portrait ? 14 : 38);
+        g.strokeStyle = 'rgba(255,255,255,.5)';
+        g.lineWidth = 1;
+        g.beginPath();
+        g.moveTo(sx, y0);
+        g.lineTo(sx, sy);
+        g.stroke();
+        g.strokeStyle = '#120418';
+        g.lineWidth = 1.8;
+        for (let side = -1; side <= 1; side += 2) {
+            for (let k = 0; k < 4; k++) {
+                const wig = Math.sin(clock * 5 + k + side) * 2;
+                g.beginPath();
+                g.moveTo(sx, sy + 4);
+                g.quadraticCurveTo(sx + side * (14 + k * 2), sy - 8 + k * 7 + wig, sx + side * (20 + k * 3), sy + 8 + k * 6);
+                g.stroke();
+            }
+        }
+        g.fillStyle = '#120418';
+        g.beginPath();
+        g.ellipse(sx, sy + 5, 7.5, 9, 0, 0, Math.PI * 2);
+        g.fill();
+        g.beginPath();
+        g.arc(sx, sy - 5, 5, 0, Math.PI * 2);
+        g.fill();
+        g.fillStyle = '#ff5a1f';
+        g.fillRect(sx - 3, sy - 6, 2, 2);
+        g.fillRect(sx + 1, sy - 6, 2, 2);
+    }
+
     function paintStatic() {
         const m = [DPR * S, 0, 0, DPR * S, DPR * OX, DPR * OY];
         const x0 = -OX / S - 2, y0 = -OY / S - 2, x1 = (W - OX) / S + 2, y1 = (H - OY) / S + 2;
@@ -2322,23 +2479,25 @@
 
         let c = backC.getContext('2d');
         c.setTransform(...m);
+        const SK = seasonNow();
         const sky = c.createLinearGradient(0, -120, 0, 440);
-        [[0, '#264203'], [0.2, '#44700c'], [0.42, '#6b9a20'], [0.66, '#a3bf78'], [0.82, '#d3e2c3'], [0.9, '#ecf2ea'], [1, '#f3f6f2']]
-            .forEach(([o, col]) => sky.addColorStop(o, tc(col)));
+        (SK ? SK.sky : [[0, '#264203'], [0.2, '#44700c'], [0.42, '#6b9a20'], [0.66, '#a3bf78'], [0.82, '#d3e2c3'], [0.9, '#ecf2ea'], [1, '#f3f6f2']])
+            .forEach(([o, col]) => sky.addColorStop(o, SK ? col : tc(col)));
         c.fillStyle = sky;
         c.fillRect(x0, y0, x1 - x0, y1 - y0);
         const haze = c.createRadialGradient(820, 150, 0, 820, 150, 620);
-        haze.addColorStop(0, tc('rgba(206,216,196,.55)'));
-        haze.addColorStop(1, tc('rgba(206,216,196,0)'));
+        haze.addColorStop(0, SK ? SK.haze : tc('rgba(206,216,196,.55)'));
+        haze.addColorStop(1, SK ? SK.haze0 : tc('rgba(206,216,196,0)'));
         c.fillStyle = haze;
         c.fillRect(x0, y0, x1 - x0, y1 - y0);
+        if (SK) paintSeasonStatic(c, x0, y0);
 
         c = floorC.getContext('2d');
         c.setTransform(...m);
         c.beginPath();
         c.ellipse(FLOOR.cx, FLOOR.cy, FLOOR.rx, FLOOR.ry, 0, 0, Math.PI * 2);
         const floor = c.createRadialGradient(640, 470, 0, 640, 470, 1150);
-        [[0, '#e3e7ea'], [0.16, '#bcc3ca'], [0.42, '#8f979e'], [0.75, '#656c72'], [1, '#4a5055']]
+        (SK ? SK.floor : [[0, '#e3e7ea'], [0.16, '#bcc3ca'], [0.42, '#8f979e'], [0.75, '#656c72'], [1, '#4a5055']])
             .forEach(([o, col]) => floor.addColorStop(o, col));
         c.fillStyle = floor;
         c.shadowColor = 'rgba(255,255,255,.9)';
@@ -2348,11 +2507,12 @@
         c = frontC.getContext('2d');
         c.setTransform(...m);
         const vig = c.createRadialGradient(640, 330, 260, 640, 330, 1050);
-        vig.addColorStop(0, tc('rgba(10,25,0,0)'));
-        vig.addColorStop(1, tc('rgba(10,25,0,.6)'));
+        vig.addColorStop(0, SK ? SK.vig0 : tc('rgba(10,25,0,0)'));
+        vig.addColorStop(1, SK ? SK.vig : tc('rgba(10,25,0,.6)'));
         c.fillStyle = vig;
         c.fillRect(x0, y0, x1 - x0, y1 - y0);
 
+        const BT = SK ? SK.bokeh : '255,255,255';
         sprites = bokeh.map((b) => {
             const box = b.r * 2 + 4;
             const s = layer();
@@ -2363,17 +2523,17 @@
             if (b.ring) {
                 sg.lineWidth = b.r > 40 ? 2 : 1.4;
                 for (let k = 0; k < 4; k++) {
-                    sg.strokeStyle = `rgba(255,255,255,${b.a * (1.7 - k * 0.3)})`;
+                    sg.strokeStyle = `rgba(${BT},${b.a * (1.7 - k * 0.3)})`;
                     sg.beginPath();
                     sg.arc(cx, cx, b.r * (1 - k * 0.24), 0, Math.PI * 2);
                     sg.stroke();
                 }
-                sg.fillStyle = `rgba(255,255,255,${b.a * 0.35})`;
+                sg.fillStyle = `rgba(${BT},${b.a * 0.35})`;
             } else {
                 const grad = sg.createRadialGradient(cx, cx, 0, cx, cx, b.r);
-                grad.addColorStop(0, `rgba(255,255,255,${b.a * 0.6})`);
-                grad.addColorStop(0.82, `rgba(255,255,255,${b.a})`);
-                grad.addColorStop(1, 'rgba(255,255,255,0)');
+                grad.addColorStop(0, `rgba(${BT},${b.a * 0.6})`);
+                grad.addColorStop(0.82, `rgba(${BT},${b.a})`);
+                grad.addColorStop(1, `rgba(${BT},0)`);
                 sg.fillStyle = grad;
             }
             sg.beginPath();
@@ -2416,6 +2576,7 @@
         }
         g.restore();
 
+        if (seasonNow()) drawSeasonFx();
         g.setTransform(1, 0, 0, 1, 0, 0);
         g.drawImage(frontC, 0, 0);
     }
