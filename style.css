@@ -1427,3 +1427,15 @@ button:focus-visible { outline: none; }
 /* phones keep it below the tiles, at a size that fits the narrower view */
 .portrait #toast.tip { top: calc(var(--view-b, 720px) - 160px); font-size: 17px; }
 .portrait #toast.tip small { font-size: 14px; }
+
+/* ── screen dimming ──────────────────────────────────────── */
+.dim-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    background: rgba(0, 0, 0, .68);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+}
+body.dimmed .dim-veil { opacity: 1; transition-duration: 2.4s; }

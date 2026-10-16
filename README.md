@@ -11,6 +11,8 @@ hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are serve
 - reduced motion: only the background drift and pulsing glows stop; navigation transitions stay
 - boot screen: plays every time the page opens (press any button, then the startup swirl and chime; pressing again skips it), then the "mewzah signed in" toast
 - guide: the orb (bottom right), Home / G, or the controller's Xbox / View button opens the Xbox Guide with socials, shortcuts (achievements, profile, game library, geobox, dashboard) and settings
+- screen dimming: after 3 idle minutes the dashboard dims (not while a youtube/twitch screen is open). any key, tap, click, wheel or pad button wakes it, and that first press is swallowed so it never acts. toggle in system settings / guide
+- controller rumble: pads that expose a `vibrationActuator` (chromium) buzz on connect, guide, notifications, achievements, eject and the red ring (`RUMBLE` in `app.js`). toggle in system settings / guide
 - themes: system settings / guide → theme recolours the site's greens at runtime (`THEMES` in `app.js`: green, blue, purple, orange), saved per browser; each theme has a boot logo in `assets/logo-<theme>.webp`
 - easter egg: hold eject (X) on the disc tile for three seconds
 - `404.html`: a 360-style "content unavailable" page for broken links, in the visitor's theme

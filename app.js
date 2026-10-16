@@ -205,6 +205,8 @@
         sound: store.get('mz.sound', true),
         motion: store.get('mz.motion', !prefersReduced),
         music: store.get('mz.music', true),
+        dim: store.get('mz.dim', true),
+        rumble: store.get('mz.rumble', true),
     };
     const setSetting = (key, value) => {
         settings[key] = value;
@@ -498,7 +500,10 @@
         toastEl.querySelector('i').innerHTML = opts.icon || '';
         toastEl.classList.toggle('tip', !!opts.icon);
         toastEl.classList.add('show');
-        if (!quiet) sfx.notify();
+        if (!quiet) {
+            sfx.notify();
+            rumble('notify');
+        }
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms);
     }
@@ -513,6 +518,38 @@
         '<circle class="pad-guide" cx="32" cy="12" r="3.6"/>' +
         '<circle cx="47" cy="9.8" r="2.5" fill="#e8b10f"/><circle cx="42.6" cy="14.2" r="2.5" fill="#2a7fe0"/>' +
         '<circle cx="51.4" cy="14.2" r="2.5" fill="#d8352a"/><circle cx="47" cy="18.6" r="2.5" fill="#5aa818"/></svg>';
+
+    // ── controller rumble ──────────────────────────────────
+    // Pulses are [ms, strong motor, weak motor] with a null as a gap. A new effect cancels the running one,
+    // so a pattern is chained with timers. Only gamepads that expose a vibrationActuator (Chromium) buzz.
+    let padIndex = -1;
+    let rumbleRun = 0;
+    const RUMBLE = {
+        connect: [[220, 0, 0.6]],
+        guide: [[70, 0, 0.5]],
+        notify: [[90, 0.25, 0.5]],
+        achievement: [[130, 0.55, 0.7], 90, [130, 0.55, 0.7]],
+        eject: [[180, 0.7, 0.2]],
+        crash: [[3000, 1, 0.8]],
+    };
+    function rumble(kind) {
+        if (!settings.rumble || padIndex < 0 || !navigator.getGamepads) return;
+        const gp = navigator.getGamepads()[padIndex];
+        const act = gp && gp.connected && gp.vibrationActuator;
+        if (!act || !act.playEffect) return;
+        const run = ++rumbleRun;
+        const step = (i) => {
+            const p = RUMBLE[kind][i];
+            if (p === undefined || run !== rumbleRun) return;
+            if (typeof p === 'number') {
+                setTimeout(() => step(i + 1), p);
+                return;
+            }
+            act.playEffect('dual-rumble', { duration: p[0], strongMagnitude: p[1], weakMagnitude: p[2] }).catch(() => {});
+            setTimeout(() => step(i + 1), p[0]);
+        };
+        step(0);
+    }
 
     function copyText(text, what = 'Discord username') {
         if (what === 'Discord username') sawSocial('discord');
@@ -651,8 +688,13 @@
         const W = Math.ceil(text.offsetLeft + text.offsetWidth + 30);
         achEl.style.width = `${W}px`;
         achEl.classList.add('show');
-        if (signin) sfx.signin();
-        else sfx.achievement();
+        if (signin) {
+            sfx.signin();
+            rumble('notify');
+        } else {
+            sfx.achievement();
+            rumble('achievement');
+        }
         const out = 'cubic-bezier(.2,.8,.2,1)';
         const anims = [
             orb.animate([
@@ -842,6 +884,7 @@
         stage.classList.add('guide-open');
         guideEl.setAttribute('aria-hidden', 'false');
         sfx.guide();
+        rumble('guide');
     }
 
     function closeGuide(quiet) {
@@ -920,6 +963,7 @@
         closeGuide(true);
         song.pause();
         sfx.crash();
+        rumble('crash');
         stage.classList.add('crash');
         setTimeout(() => {
             stage.classList.remove('crash');
@@ -952,6 +996,7 @@
     fetch(STATS_URL, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then(applyStats, () => {});
 
     function eject() {
+        rumble('eject'); // before unlock, so a first-time achievement's buzz wins
         unlock('eject');
         sfx.eject();
         toast('Disc tray open', true);
@@ -1854,11 +1899,14 @@
             if (settings.music) startMusic(true);
             else song.pause();
         }
+        if (key === 'rumble' && settings.rumble) rumble('connect');
     }
     const SETTINGS = [
         { label: 'Sound Effects', value: () => onOff(settings.sound), run: () => toggleSetting('sound') },
         { label: 'Background Music', value: () => onOff(settings.music), run: () => toggleSetting('music') },
         { label: 'Background Motion', value: () => onOff(settings.motion), run: () => toggleSetting('motion') },
+        { label: 'Screen Dimming', value: () => onOff(settings.dim), run: () => toggleSetting('dim') },
+        { label: 'Controller Vibration', value: () => onOff(settings.rumble), run: () => toggleSetting('rumble') },
         { label: 'Theme', value: () => theme.name, run: () => cycleTheme(1), cycle: (d) => cycleTheme(d) },
     ];
 
@@ -2031,6 +2079,43 @@
         }
     }
 
+    // ── screen dimming ─────────────────────────────────────
+    // A few idle minutes dim the dashboard. The first press (key, tap, click, wheel or pad button) only wakes it.
+    const DIM_AFTER = 3 * 60 * 1000;
+    const veil = make('div', 'dim-veil');
+    document.body.append(veil);
+    let lastActive = performance.now();
+    let dimmed = false;
+    let wokeAt = -1e9;
+    function wake(swallow) {
+        lastActive = performance.now();
+        if (!dimmed) return false;
+        dimmed = false;
+        document.body.classList.remove('dimmed');
+        if (swallow) wokeAt = lastActive;
+        return true;
+    }
+    const justWoke = () => performance.now() - wokeAt < 700;
+    setInterval(() => {
+        if (dimmed || !settings.dim || booting || document.hidden || document.querySelector('.rrod')) return;
+        if (state.screen && VIDEO_SCREENS.has(state.screen)) return; // a video may be playing
+        if (performance.now() - lastActive > DIM_AFTER) {
+            dimmed = true;
+            document.body.classList.add('dimmed');
+        }
+    }, 1000);
+    addEventListener('pointerdown', () => wake(true), true);
+    addEventListener('pointermove', () => wake(false), { passive: true });
+    addEventListener('touchstart', () => wake(true), { passive: true, capture: true });
+    addEventListener('click', (e) => {
+        if (!justWoke()) return;
+        e.stopPropagation();
+        e.preventDefault();
+    }, true);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) lastActive = performance.now();
+    });
+
     const KEYS = {
         ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
         Enter: 'a', ' ': 'a', Escape: 'b', Backspace: 'b', a: 'a', A: 'a', b: 'b', B: 'b', x: 'x', X: 'x', y: 'y', Y: 'y',
@@ -2038,10 +2123,12 @@
     };
     let lastMove = 0;
     addEventListener('keydown', (e) => {
+        const woke = wake(true);
         if (e.ctrlKey || e.metaKey || e.altKey) return;
         const action = KEYS[e.key];
         if (!action) return;
         e.preventDefault();
+        if (woke) return;
         sfx.unlock();
         startMusic();
         wakeAvatar();
@@ -2070,6 +2157,7 @@
     let wheelAt = 0;
     addEventListener('wheel', (e) => {
         e.preventDefault();
+        if (wake(true)) return;
         const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey;
         const delta = horizontal ? e.deltaX || e.deltaY : e.deltaY;
         if (Math.abs(delta) < 4) return;
@@ -2091,7 +2179,7 @@
         const dx = t.clientX - touch.x;
         const dy = t.clientY - touch.y;
         touch = null;
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < 36) return;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 36 || justWoke()) return;
         if (Math.abs(dx) > Math.abs(dy)) input(dx < 0 ? 'right' : 'left', 'touch');
         else input(dy < 0 ? 'down' : 'up', 'touch');
     });
@@ -2106,7 +2194,11 @@
                 break;
             }
         }
-        if (!gp) return;
+        if (!gp) {
+            padIndex = -1;
+            return;
+        }
+        padIndex = gp.index;
         const btn = (i) => !!(gp.buttons[i] && gp.buttons[i].pressed);
         const ax = gp.axes;
         const held = {
@@ -2120,6 +2212,13 @@
             y: btn(3),
             guide: btn(16) || btn(8),
         };
+        if (gp.buttons.some((b) => b.pressed) || Object.values(held).some(Boolean)) {
+            if (wake(true)) {
+                Object.assign(pad.prev, held); // the waking press must not also act
+                return;
+            }
+            lastActive = performance.now();
+        }
         for (const key of Object.keys(held)) {
             const on = held[key];
             const vertical = key === 'up' || key === 'down';
@@ -2135,7 +2234,11 @@
             pad.prev[key] = on;
         }
     }
-    addEventListener('gamepadconnected', () => toast('Controller connected'));
+    addEventListener('gamepadconnected', (e) => {
+        padIndex = e.gamepad.index;
+        toast('Controller connected');
+        rumble('connect');
+    });
     const orbEl = $('#orb');
     orbEl.setAttribute('role', 'button');
     orbEl.setAttribute('aria-label', 'Open the Guide');
@@ -2318,6 +2421,7 @@
     }
 
     let last = performance.now();
+    let lastDraw = 0;
     function frame(now) {
         const dt = Math.min(0.05, (now - last) / 1000);
         last = now;
@@ -2327,8 +2431,9 @@
         const moving = Math.abs(cam.tx - cam.x) > 0.1 || Math.abs(cam.ty - cam.y) > 0.1;
         cam.x += (cam.tx - cam.x) * k;
         cam.y += (cam.ty - cam.y) * k;
-        if (settings.motion || moving || needsDraw) {
+        if ((settings.motion || moving || needsDraw) && !(dimmed && now - lastDraw < 66)) {
             drawBg();
+            lastDraw = now;
             needsDraw = false;
         }
         requestAnimationFrame(frame);
