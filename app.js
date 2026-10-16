@@ -1463,11 +1463,26 @@
         frame.referrerPolicy = 'strict-origin-when-cross-origin';
         panel.append(frame);
         body.append(panel);
+        return frame;
     }
 
+    // The upload waits for a press of play. With enablejsapi the player reports its state over postMessage
+    // once told someone is listening, so the music stops (and Tuned In counts) only while it really plays.
+    const YT_ORIGIN = 'https://www.youtube-nocookie.com';
+    let ytHeard = false;
     function renderYouTube(body) {
         const s = SOCIALS.youtube;
-        renderEmbed(body, `https://www.youtube-nocookie.com/embed/videoseries?list=${s.uploads}&autoplay=1&rel=0&playsinline=1`, `${s.name}: latest uploads`);
+        const frame = renderEmbed(body, `${YT_ORIGIN}/embed/videoseries?list=${s.uploads}&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`, `${s.name}: latest uploads`);
+        ytHeard = false;
+        frame.addEventListener('load', () => {
+            let tries = 0;
+            const hello = () => {
+                if (ytHeard || !frame.isConnected || ++tries > 20) return;
+                frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 'mz-yt', channel: 'widget' }), YT_ORIGIN);
+                setTimeout(hello, 500);
+            };
+            hello();
+        });
         const list = make('div', 'list compact');
         list.append(make('p', 'list-head', statText(s)));
         if (latest) list.append(make('p', 'list-sub', `Latest: ${latest.title}`));
@@ -1477,6 +1492,28 @@
             item(list, 'Subscribe', (src) => openLink(`${s.href}?sub_confirmation=1`, src)),
         ];
     }
+
+    addEventListener('message', (e) => {
+        if (e.origin !== YT_ORIGIN || state.screen !== 'youtube') return;
+        let data;
+        try {
+            data = JSON.parse(e.data);
+        } catch {
+            return;
+        }
+        ytHeard = true;
+        const ps = data.event === 'onStateChange' ? data.info : data.info && data.info.playerState;
+        if (ps === 1) {
+            if (!song.paused) {
+                song.pause();
+                musicHeld = true;
+            }
+            if (!tunedTimer) tunedTimer = setTimeout(() => state.screen === 'youtube' && unlock('tuned'), 8000);
+        } else if (ps === 0 || ps === 2) {
+            clearTimeout(tunedTimer);
+            tunedTimer = 0;
+        }
+    });
 
     function renderTwitch(body) {
         const s = SOCIALS.twitch;
@@ -1876,7 +1913,8 @@
                 history.pushState({ mzScreen: true }, '');
             } catch { /* history unavailable */ }
         }
-        if (VIDEO_SCREENS.has(key) && !song.paused) {
+        // Twitch starts on its own, so the music makes way at once; YouTube waits for its player to say so.
+        if (key === 'twitch' && !song.paused) {
             song.pause();
             musicHeld = true;
         }
@@ -1884,6 +1922,7 @@
             gbxStop();
             gbx.items = null;
             clearTimeout(tunedTimer);
+            tunedTimer = 0;
             screenEl.querySelectorAll('iframe').forEach((f) => f.remove());
             if (musicHeld && !VIDEO_SCREENS.has(key)) {
                 musicHeld = false;
@@ -1896,7 +1935,6 @@
         if (key === 'profile') unlock('profile');
         if (key === 'youtube' || key === 'twitch') sawSocial(key);
         if (key === 'twitch' && live.on) unlock('front');
-        if (key === 'youtube') tunedTimer = setTimeout(() => state.screen === 'youtube' && unlock('tuned'), 8000);
         stage.classList.add('in-screen');
         screenEl.setAttribute('aria-hidden', 'false');
         announce();
@@ -1909,6 +1947,7 @@
     function closeScreen(fromHistory) {
         if (!fromHistory && history.state && history.state.mzScreen) history.back();
         clearTimeout(tunedTimer);
+        tunedTimer = 0;
         gbxStop();
         gbx.items = null;
         // Hidden screens stay in the DOM for the fade-out; embedded players must go now or they keep playing.
