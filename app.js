@@ -53,7 +53,7 @@
     // YouTube subscribers and latest upload, refreshed every few hours by .github/workflows/stats.yml.
     const STATS_URL = 'data/stats.json';
 
-    // Achievements are earned per visitor and saved in their browser. 200G in total, like an Arcade game.
+    // Achievements are earned per visitor and saved in their browser. 250G in total (240G outside Halloween).
     const ACHIEVEMENTS = [
         { id: 'boot', name: 'Welcome Home', desc: "Boot up mewzah's dashboard.", g: 10, icon: 'home' },
         { id: 'profile', name: 'Gamer Card', desc: "View mewzah's gamer profile.", g: 10, icon: 'card' },
@@ -69,6 +69,12 @@
         { id: 'konami', name: 'Old School', desc: 'Enter the Konami code.', g: 20, icon: 'controller', secret: true },
         { id: 'rrod', name: 'Three Red Lights', desc: 'Hold Eject until something breaks.', g: 20, icon: 'ring', secret: true },
         { id: 'night', name: 'Night Owl', desc: 'Visit between midnight and 5am.', g: 10, icon: 'moon', secret: true },
+        { id: 'wave', name: 'Hi There', desc: 'Make your avatar do an emote.', g: 10, icon: 'people' },
+        { id: 'style', name: 'Fashionista', desc: 'Try every theme.', g: 10, icon: 'monitor' },
+        { id: 'still', name: 'Still There?', desc: 'Leave the dashboard alone until it dims.', g: 10, icon: 'moon', secret: true },
+        { id: 'rumble', name: 'Good Vibrations', desc: 'Feel your controller rumble.', g: 10, icon: 'controller', secret: true },
+        // seasonal: only listed while its theme is in THEMES
+        ...(THEMES.some((t) => t.id === 'halloween') ? [{ id: 'trick', name: 'Trick or Treat', desc: 'Switch to the Halloween theme.', g: 10, icon: 'ring', secret: true }] : []),
     ];
 
     // Free Twitch status service (no API key). Uptime replies with a duration when live, '<name> is offline' otherwise.
@@ -482,6 +488,10 @@
         const i = THEMES.indexOf(theme);
         applyTheme(THEMES[(i + d + THEMES.length) % THEMES.length]);
         unlock('settings');
+        themesTried.add(theme.id);
+        saveJSON('mz.themes', [...themesTried]);
+        if (THEMES.every((t) => themesTried.has(t.id))) unlock('style');
+        if (theme.id === 'halloween') unlock('trick');
         toast(`Theme: ${theme.name}`, true);
     }
 
@@ -539,6 +549,7 @@
         const act = gp && gp.connected && gp.vibrationActuator;
         if (!act || !act.playEffect) return;
         const run = ++rumbleRun;
+        if (!achStore.rumble) setTimeout(() => unlock('rumble'), 1200);
         const step = (i) => {
             const p = RUMBLE[kind][i];
             if (p === undefined || run !== rumbleRun) return;
@@ -610,12 +621,16 @@
     const earnedG = () => ACHIEVEMENTS.reduce((t, a) => t + (achStore[a.id] ? a.g : 0), 0);
     const achQueue = [];
     let achBusy = false;
+    let achReadyAt = 0;
+    // Not spammy: unlocks that pile up share one pop-up, and a few seconds pass between achievement pop-ups.
+    const ACH_GAP = 3000;
     let signedIn = false;
     let tunedTimer = 0;
     const KONAMI = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
     const konami = [];
     const socialsSeen = new Set();
     const played = new Set(readJSON('mz.played', []));
+    const themesTried = new Set([...readJSON('mz.themes', []), theme.id]);
 
     function unlock(id) {
         const a = ACHIEVEMENTS.find((x) => x.id === id);
@@ -670,7 +685,7 @@
 
     function showAchievement() {
         if (achBusy || booting || !achQueue.length) return;
-        const wait = toastUntil - performance.now();
+        const wait = Math.max(toastUntil, achReadyAt) - performance.now();
         if (wait > 0) {
             setTimeout(showAchievement, wait + 200);
             return;
@@ -678,13 +693,19 @@
         achBusy = true;
         const a = achQueue.shift();
         const signin = !!a.signin;
+        const batch = [a];
+        if (!signin) while (achQueue.length && !achQueue[0].signin) batch.push(achQueue.shift());
+        const batchG = batch.reduce((t, x) => t + x.g, 0);
         if (signin) signedIn = true;
         const bar = achEl.querySelector('.ach-bar');
         const orb = achEl.querySelector('.ach-orb');
         const text = achEl.querySelector('.ach-text');
         const [l1, l2] = text.querySelectorAll('p');
-        l1.textContent = signin ? `${PROFILE.tag} signed in` : 'Achievement unlocked';
-        l2.textContent = signin ? '' : `${a.g}G - ${a.name}`;
+        l1.textContent = signin ? `${PROFILE.tag} signed in` : batch.length > 1 ? `${batch.length} achievements unlocked` : 'Achievement unlocked';
+        // two short names fit side by side; otherwise "+N more" keeps the pop-up clear of the button legend
+        const names = batch.length === 2 && a.name.length + batch[1].name.length <= 18 ? `${a.name}, ${batch[1].name}`
+            : batch.length > 1 ? `${a.name} +${batch.length - 1} more` : a.name;
+        l2.textContent = signin ? '' : `${batch.length > 1 ? batchG : a.g}G - ${names}`;
         const H = 70;
         const W = Math.ceil(text.offsetLeft + text.offsetWidth + 30);
         achEl.style.width = `${W}px`;
@@ -732,7 +753,9 @@
                 const held = heldToasts.pop();
                 heldToasts.length = 0;
                 if (held) toast(...held);
-                setTimeout(showAchievement, 350);
+                const gap = signin ? 350 : ACH_GAP;
+                achReadyAt = performance.now() + gap;
+                setTimeout(showAchievement, gap);
                 if (hintWanted && !achQueue.length) setTimeout(mouseHint, 900);
             });
         }, signin ? 3000 : 4800);
@@ -1299,7 +1322,10 @@
             };
             emote.onended = back;
             emote.onerror = back;
-            emote.addEventListener('playing', () => run(emote, () => view.classList.add('emote')), { once: true });
+            emote.addEventListener('playing', () => {
+                run(emote, () => view.classList.add('emote'));
+                unlock('wave');
+            }, { once: true });
             emote.play().catch(back);
         };
 
@@ -2094,6 +2120,7 @@
         dimmed = false;
         document.body.classList.remove('dimmed');
         if (swallow) wokeAt = lastActive;
+        setTimeout(() => unlock('still'), 600);
         return true;
     }
     const justWoke = () => performance.now() - wokeAt < 700;

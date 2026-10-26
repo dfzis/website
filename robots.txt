@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mewzah.tv/sitemap.xml
