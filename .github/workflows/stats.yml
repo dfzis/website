@@ -15,6 +15,11 @@ permissions:
   contents: write
   pages: write
 
+# one run at a time, so a push-triggered run can't race a scheduled one
+concurrency:
+  group: refresh-stats
+  cancel-in-progress: false
+
 env:
   SITE_BRANCH: claude/rebrand-y2k-theme-GkSiQ
 
@@ -41,5 +46,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/stats.json
           git commit -m "refresh stats"
+          # the branch may have moved while the script ran
+          git pull --rebase origin "${SITE_BRANCH}"
           git push origin "HEAD:${SITE_BRANCH}"
           gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" || true

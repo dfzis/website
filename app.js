@@ -218,7 +218,6 @@
     const setSetting = (key, value) => {
         settings[key] = value;
         store.set(`mz.${key}`, value);
-        document.body.classList.toggle('still', !settings.motion);
         needsDraw = true;
     };
 
@@ -594,6 +593,10 @@
     function startMusic(force) {
         interacted = true;
         if ((musicStarted && !force) || !settings.music || !songReady()) return;
+        if (state.screen === 'twitch' || (state.screen === 'youtube' && ytPlaying)) {
+            musicHeld = true; // starts when the video screen closes
+            return;
+        }
         musicStarted = true;
         song.play().catch(() => { musicStarted = false; });
     }
@@ -965,6 +968,7 @@
     // red lights, then it "reboots" and a secret achievement pops.
     let rrodTimer = 0;
     let rebooting = false;
+    let crashing = false;
     function holdEject(on) {
         clearTimeout(rrodTimer);
         if (on && !booting && !state.screen && !guide.open && currentTile() === discTile) rrodTimer = setTimeout(redRing, 3000);
@@ -983,7 +987,8 @@
     })();
 
     function redRing() {
-        if (booting || document.querySelector('.rrod')) return;
+        if (booting || crashing || state.screen || guide.open || currentTile() !== discTile) return;
+        crashing = true;
         closeGuide(true);
         song.pause();
         sfx.crash();
@@ -1000,6 +1005,7 @@
                 el.classList.add('out');
                 setTimeout(() => el.remove(), 700);
                 rebooting = true;
+                crashing = false;
                 document.body.dataset.crashed = '1';
                 showBoot();
                 bootPress();
@@ -1178,7 +1184,6 @@
             el.style.setProperty('--art', `url("${game.art}")`);
             el.append(make('span', 't-label t-wrap', t.label), make('span', 'disc-badge'));
         } else {
-            el.dataset.tile = t.icon;
             el.insertAdjacentHTML('beforeend', glyph(t.icon));
             el.append(make('span', 't-label', t.label));
             if (t.icon === 'twitch') el.append(make('span', 'live-badge', liveBadge()));
@@ -1384,6 +1389,7 @@
         }
         if (t.href) {
             sfx.select();
+            if (SOCIALS[t.icon]) sawSocial(t.icon);
             return;
         }
         e.preventDefault();
@@ -1404,7 +1410,7 @@
         layoutRow();
     }
 
-    const visited = new Set();
+    const visited = new Set([state.ch]);
     function gotoChannel(i, dir, steps = 1) {
         if (state.screen || i === state.ch) return;
         state.ch = i;
@@ -1542,10 +1548,12 @@
     // once told someone is listening, so the music stops (and Tuned In counts) only while it really plays.
     const YT_ORIGIN = 'https://www.youtube-nocookie.com';
     let ytHeard = false;
+    let ytPlaying = false;
     function renderYouTube(body) {
         const s = SOCIALS.youtube;
         const frame = renderEmbed(body, `${YT_ORIGIN}/embed/videoseries?list=${s.uploads}&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`, `${s.name}: latest uploads`);
         ytHeard = false;
+        ytPlaying = false;
         frame.addEventListener('load', () => {
             let tries = 0;
             const hello = () => {
@@ -1575,6 +1583,7 @@
         }
         ytHeard = true;
         const ps = data.event === 'onStateChange' ? data.info : data.info && data.info.playerState;
+        if (ps === 1 || ps === 0 || ps === 2) ytPlaying = ps === 1;
         if (ps === 1) {
             if (!song.paused) {
                 song.pause();
@@ -1586,6 +1595,12 @@
             tunedTimer = 0;
         }
     });
+
+    // Clicking into the YouTube/Twitch player moves keyboard focus into it; take it back so Esc/B and the arrows work.
+    addEventListener('blur', () => setTimeout(() => {
+        const el = document.activeElement;
+        if (el && el.tagName === 'IFRAME' && state.screen) el.blur();
+    }, 300));
 
     function renderTwitch(body) {
         const s = SOCIALS.twitch;
@@ -1693,9 +1708,7 @@
         if (GEOBOX.code) {
             items.push(item(list, `Copy code ${GEOBOX.code}`, () => {
                 unlock('code');
-                const done = () => toast(`Geobox code ${GEOBOX.code} copied`);
-                if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(GEOBOX.code).then(done, done);
-                else done();
+                copyText(GEOBOX.code, 'Geobox code');
             }));
         }
         items.push(item(list, 'Get Geobox', (src) => openLink(GEOBOX.href, src)));
@@ -2059,6 +2072,7 @@
 
     // ── input ──────────────────────────────────────────────
     function input(action, src) {
+        if (crashing) return;
         if (src === 'key' || src === 'pad') hintDone = true;
         if (booting) {
             if (src !== 'wheel') bootPress();
@@ -2161,7 +2175,7 @@
         startMusic();
         wakeAvatar();
         const isDir = action === 'left' || action === 'right' || action === 'up' || action === 'down';
-        if (e.repeat && !isDir) return;
+        if (e.repeat && (!isDir || booting)) return;
         if (action === 'x') holdEject(true);
         if (isDir) {
             const now = performance.now();
@@ -2184,6 +2198,7 @@
 
     let wheelAt = 0;
     addEventListener('wheel', (e) => {
+        if (e.ctrlKey) return; // browser zoom / trackpad pinch
         e.preventDefault();
         if (wake(true)) return;
         const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey;
@@ -2254,7 +2269,7 @@
             if (on && !pad.prev[key]) {
                 input(key, 'pad');
                 pad.next[key] = now + (vertical ? 420 : 340);
-            } else if (on && isDir && now >= pad.next[key]) {
+            } else if (on && isDir && !booting && now >= pad.next[key]) {
                 input(key, 'pad');
                 pad.next[key] = now + (vertical ? 300 : 140);
             }
@@ -2741,11 +2756,12 @@
         try {
             const res = await fetch(`${TWITCH_STATUS}/uptime/${user}`, { cache: 'no-store' });
             const text = (await res.text()).trim();
-            const on = res.ok && !/offline/i.test(text) && /\d+\s+(second|minute|hour|day)/.test(text);
-            if (!on) {
+            if (!res.ok) return; // service hiccup: keep the last known state
+            if (/offline/i.test(text)) {
                 setLive(false, '');
                 return;
             }
+            if (!/\d+\s+(second|minute|hour|day)/.test(text)) return;
             const get = (what) => fetch(`${TWITCH_STATUS}/${what}/${user}`, { cache: 'no-store' })
                 .then((r) => (r.ok ? r.text() : ''), () => '').then((t) => t.trim());
             const [game, title, viewers] = await Promise.all([get('game'), get('title'), get('viewercount')]);
