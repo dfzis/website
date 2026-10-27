@@ -9,7 +9,11 @@
     <link rel="icon" href="/favicon.ico?v=2" sizes="any">
     <script>
         // match the theme picked on the dashboard
-        try { document.documentElement.dataset.theme = localStorage.getItem('mz.theme') || 'green'; } catch (e) { /* no storage */ }
+        try {
+            var t = localStorage.getItem('mz.theme') || 'green';
+            if (t === 'halloween' && new Date() >= new Date('2026-11-01T00:00:00')) t = 'green'; // season over
+            document.documentElement.dataset.theme = t;
+        } catch (e) { /* no storage */ }
     </script>
     <style>
         @font-face {

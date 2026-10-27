@@ -47,8 +47,9 @@
         { id: 'blue', name: 'Blue', hue: 195, logo: 'assets/logo-blue.webp' },
         { id: 'purple', name: 'Purple', hue: 272, lift: 0.3, logo: 'assets/logo-purple.webp' },
         { id: 'orange', name: 'Orange', hue: 26, logo: 'assets/logo-orange.webp' },
-        { id: 'halloween', name: 'Halloween', hue: 26, lift: 0.6, season: 'halloween', logo: 'assets/logo-orange.webp' },
-    ];
+        // seasonal: `until` drops it from the picker at midnight (visitor's time) on that date; change the date to bring it back
+        { id: 'halloween', name: 'Halloween', hue: 26, lift: 0.6, season: 'halloween', logo: 'assets/logo-orange.webp', until: '2026-11-01' },
+    ].filter((t) => !t.until || new Date() < new Date(`${t.until}T00:00:00`));
 
     // YouTube subscribers and latest upload, refreshed every few hours by .github/workflows/stats.yml.
     const STATS_URL = 'data/stats.json';
@@ -440,7 +441,9 @@
 
     let theme = THEMES[0];
     try {
-        theme = THEMES.find((t) => t.id === localStorage.getItem('mz.theme')) || theme;
+        const saved = localStorage.getItem('mz.theme');
+        theme = THEMES.find((t) => t.id === saved) || theme;
+        if (saved && saved !== theme.id) localStorage.setItem('mz.theme', theme.id); // its season ended
     } catch { /* storage unavailable */ }
     const tc = (c) => (theme.hue ? recolor(c, theme.hue, theme.lift) : c);
     const mainCss = document.querySelector('link[rel="stylesheet"]');
