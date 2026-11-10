@@ -1219,6 +1219,8 @@ button:focus-visible { outline: none; }
     overflow: hidden;
 }
 .scroller .item { flex-shrink: 0; }
+/* gamer profile: four social rows visible under Achievements, the rest scroll */
+.scroller.gc-socials { height: 218px; }
 .item.locked .lbl { opacity: .62; }
 .item.has-link .val::after { content: " ↗"; }
 
