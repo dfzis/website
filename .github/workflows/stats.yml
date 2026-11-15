@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  SITE_BRANCH: claude/rebrand-y2k-theme-GkSiQ
+  SITE_BRANCH: main
 
 jobs:
   stats:
