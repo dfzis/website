@@ -1,0 +1,3 @@
+# Netlify publishes this repo as-is from main: no build step, served from the repo root.
+[build]
+  publish = "."

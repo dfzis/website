@@ -1,4 +1,4 @@
-# Keeps data/stats.json fresh (YouTube subscribers + latest upload) on the branch GitHub Pages serves.
+# Keeps data/stats.json fresh (YouTube subscribers + latest upload) on main, which Netlify deploys on every push.
 # Scheduled runs only fire from the repository's default branch.
 name: refresh stats
 
@@ -13,7 +13,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 # one run at a time, so a push-triggered run can't race a scheduled one
 concurrency:
@@ -34,9 +33,7 @@ jobs:
         with:
           node-version: 20
       - run: node scripts/update-stats.mjs
-      - name: Commit and publish if changed
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Commit if changed (Netlify redeploys on push)
         run: |
           if git diff --quiet -- data/stats.json && [ -z "$(git status --porcelain -- data/stats.json)" ]; then
             echo "no change"
@@ -49,4 +46,3 @@ jobs:
           # the branch may have moved while the script ran
           git pull --rebase origin "${SITE_BRANCH}"
           git push origin "HEAD:${SITE_BRANCH}"
-          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" || true

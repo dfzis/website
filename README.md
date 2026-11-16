@@ -2,7 +2,7 @@
 
 mewzah's personal site: an xbox 360 nxe-style dashboard. plain html/css/js, no build step.
 
-hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are served as-is). © mewzah, all rights reserved.
+hosted on netlify, deployed automatically from the `main` branch of github.com/dfzis/website (`netlify.toml`: no build step, the repo root is published). dns and the domain are on netlify too. `CNAME` and `.nojekyll` are left over from github pages and only matter if the site ever moves back there. © mewzah, all rights reserved.
 
 - content (profile, gamerscore, socials and follower counts, games, channels): top of `app.js`
 - channels: contact (the business email from `CONTACT` in `app.js`), friends (geobox), socials (youtube, twitch, tiktok, instagram, x, discord), my xbox (disc, gamer profile, game library, my setup once `SETUP` has items, system settings)
@@ -24,7 +24,7 @@ hosted on github pages (custom domain in `CNAME`, `.nojekyll` so files are serve
 - geobox (sponsor): the friends channel's partner tile, opening a playable mock of geobox's search panel; `GEOBOX.code` in `app.js` is the creator code shown with a copy button (`null` hides it); logo in `assets/geobox.webp`
 - live status: every 2 minutes the page asks decapi.me (free, no key) whether the twitch channel is live; when it is, the twitch tile shows LIVE with the viewer count, the twitch screen shows the stream title, the gamercard says what's being streamed and a pop-up announces it
 - search: `index.html` has the search title/description and JSON-LD (`WebSite` + `Person` with `sameAs` links to the socials); `robots.txt` points to `sitemap.xml`. update `sameAs` if a social handle changes. the link preview (og tags, `assets/og.jpg`) is separate
-- stats: `.github/workflows/stats.yml` runs `scripts/update-stats.mjs` every 3 hours to refresh `data/stats.json` (youtube subscriber count and latest upload) and commits it to the branch pages serves. scheduled workflows only run from the repo's default branch. twitch, x and tiktok counts are set by hand in `SOCIALS`
+- stats: `.github/workflows/stats.yml` runs `scripts/update-stats.mjs` every 3 hours to refresh `data/stats.json` (youtube subscriber count and latest upload) and commits it to `main`, which netlify redeploys. scheduled workflows only run from the repo's default branch. twitch, x and tiktok counts are set by hand in `SOCIALS`
 - achievements: 19 achievements worth 250G (240G outside halloween, when the seasonal one isn't listed), unlocked by exploring the site and saved in each visitor's browser. to keep it from feeling spammy, unlocks that pile up share one pop-up ("2 achievements unlocked") and `ACH_GAP` (3s) passes between achievement pop-ups. a seasonal achievement only exists while its theme is in `THEMES`. they pop up with a recreation of the 360 toast (orb pops in, bar unrolls, "Achievement unlocked / 10G - Name") and are listed under gamer profile → achievements. the chime is synthesized; drop a real file in `assets/sfx/` and set `SFX_FILES.achievement` to use it
 - music: `assets/song.mp3` starts on the first key press or tap and loops; visitors can turn it off in system settings
 - font: uses convection (the real 360 dashboard font) when it's installed on the visitor's computer, otherwise the free barlow, self-hosted in `assets/fonts` under the SIL open font license
