@@ -2,7 +2,7 @@
 
 mewzah's personal site: an xbox 360 nxe-style dashboard. plain html/css/js, no build step.
 
-hosted on netlify, deployed automatically from the `main` branch of github.com/dfzis/website (`netlify.toml`: no build step, the repo root is published). dns and the domain are on netlify too. `CNAME` and `.nojekyll` are left over from github pages and only matter if the site ever moves back there. © mewzah, all rights reserved.
+hosted on netlify, deployed automatically from the `main` branch of github.com/dfzis/website (`netlify.toml`: no build step, the repo root is published). dns and the domain are on netlify too. © mewzah, all rights reserved.
 
 - content (profile, gamerscore, socials and follower counts, games, channels): top of `app.js`
 - channels: contact (the business email from `CONTACT` in `app.js`), friends (geobox), socials (youtube, twitch, tiktok, instagram, x, discord), my xbox (disc, gamer profile, game library, my setup once `SETUP` has items, system settings)
